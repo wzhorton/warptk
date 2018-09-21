@@ -8,7 +8,7 @@ Maintainer: Same <example@email.com>
 Description: Warping Toolkit provides several methods of time warping (curve registration)
     as well as needed utility functions.
 License: MIT
-Depends: R (>= 3.4.0)
-Imports: fields (>= 9.6), Matrix (>= 1.2-13), hortonlib
+Depends: R (>= 3.4.0), hortonlib
+Imports: fields (>= 9.6), Matrix (>= 1.2-13)
 Encoding: UTF-8
 LazyData: true
