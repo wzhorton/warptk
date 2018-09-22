@@ -3,3 +3,5 @@
 export(K1)
 export(K2)
 export(interp_spline)
+export(landmark_warp)
+importFrom(splines,bs)
