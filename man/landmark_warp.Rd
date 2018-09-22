@@ -14,8 +14,8 @@ landmark_warp(y_list, feat_list, template_feats)
 \item{template_feats}{a feature vector with length mathing those in feat_list}
 }
 \value{
-a list of warped curves. List elements are vectors with length matching
-  the elements of y_list.
+a list of warped curves and a pointwise mean curve. List elements are
+  vectors with length matching the elements of y_list.
 }
 \description{
 Warps a list of curves by matching landmarks to provided template landmarks.
