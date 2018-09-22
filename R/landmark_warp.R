@@ -7,8 +7,8 @@
 #' @param y_list list of curves with equal length
 #' @param feat_list list of feature vectors with equal length
 #' @param template_feats a feature vector with length mathing those in feat_list
-#' @return a list of warped curves. List elements are vectors with length matching
-#'   the elements of y_list.
+#' @return a list of warped curves and a pointwise mean curve. List elements are
+#'   vectors with length matching the elements of y_list.
 #' @export
 
 landmark_warp <- function(y_list, feat_list, template_feats){
