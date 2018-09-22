@@ -1,5 +1,21 @@
 #### template_gp_warp.R ####
 
+#' Template Gaussian Process Warping
+#'
+#' Performs hierarchical curve warping by modeling the warping functions with GP.
+#'
+#' @param y_list list of curves with equal length
+#' @param feat_list list of feature vectors with equal length
+#' @param template_feats a feature vector with length mathing those in feat_list
+#' @param niter,nburn MCMC iterations and burns. Total run time is the sum.
+#' @param int_p number of internal knots specified for the data curves
+#' @param asig,bsig,at,bt,al,bl,aa,ba hyperparameters for inverse gamma priors on model variances
+#' @param progress logical; indicates whether or not to print percent progress.
+#' @return a list of warped curves, the estimated mean curve, and a vector of MCMC
+#'   acceptance rates. Curve list elements are vectors with length matching
+#'   the elements of y_list.
+#' @export
+
 gp_template_warp <- function(y_list, feat_list, template_feats,
                              niter = 5000, nburn = 10000, int_p = 20,
                              asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,

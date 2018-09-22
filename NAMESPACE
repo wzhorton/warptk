@@ -2,6 +2,7 @@
 
 export(K1)
 export(K2)
+export(gp_template_warp)
 export(interp_spline)
 export(landmark_warp)
 export(telesca_warp)
