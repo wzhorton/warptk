@@ -10,6 +10,7 @@
 #'
 #' @param x,y coordinate vectors on which to fit a cubic spline.
 #' @param nout number of points to interpolate out
+#' @importFrom splines bs
 #' @export
 
 interp_spline <- function(x, y, nout = length(y)) {
