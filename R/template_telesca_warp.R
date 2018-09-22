@@ -1,15 +1,19 @@
+#### template_telesca_warp ####
+
 #### telesca_warp.R ####
 
-#' Telesca Hierarchical Warping
+#' Template Telesca Hierarchical Warping
 #'
-#' Implements a method of bayesian hierarchical curve registration described in a paper
-#' by Telesca (date).
+#' Modifies a method of bayesian hierarchical curve registration described in a paper
+#' by Telesca (date) through use of a likelihood penalty.
 #'
 #' @param y_list list of curves with equal length
+#' @param feat_list list of feature vectors with equal length
+#' @param template_feats a feature vector with length mathing those in feat_list
 #' @param niter,nburn MCMC iterations and burns. Total run time is the sum.
 #' @param int_q number of internal knots specified for the warping function
 #' @param int_p number of internal knots specified for the data curves
-#' @param asig,bsig,at,bt,al,bl hyperparameters for inverse gamma priors on model variances
+#' @param asig,bsig,at,bt,al,bl,ak,bk hyperparameters for inverse gamma priors on model variances
 #' @param progress logical; indicates whether or not to print percent progress.
 #' @return a list of warped curves, the estimated mean curve, and a vector of MCMC
 #'   acceptance rates. Curve list elements are vectors with length matching
@@ -18,9 +22,10 @@
 
 
 
-telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p = 20,
+telesca_warp <- function(y_list, feat_list, template_feats,
+                         niter = 5000, nburn = 10000, int_q = 5, int_p = 20,
                          asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
-                         progress = TRUE){
+                         ak = 1, bk = .01, progress = TRUE){
 
   #----- Fixed Values -----#
 
@@ -68,6 +73,8 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
   tau2_save[1] <- 1
   lam2_save <- numeric(nrun)
   lam2_save[1] <- 1
+  kap2_save <- numeric(nrun)
+  kap2_save[1] <- 1
 
   phi <- lapply(1:n, function(i) Upsilon)
   wtime <- lapply(1:n, function(i) time)
@@ -95,7 +102,9 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
     for(i in 1:n){
       tmp_phi <- phi[[i]]
       current_llik <- dmnorm(y = y_list[[i]], mu =  H_list[[i]] %*% beta_save[it - 1,],
-                             prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE)
+                             prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE) +
+                      dmnorm(y = (wtime[[i]])[feat_list[[i]]], mu = time[template_feats],
+                             prec = 1/kap2_save[it - 1]*diag(length(template_feats)), log = TRUE)
       current_lprior <- dmnorm(y = phi[[i]], mu = Upsilon,
                                prec = 1 / lam2_save[it - 1] * Q, log = TRUE)
       for(j in 2:(q-1)){
@@ -103,7 +112,9 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
                             max = min(tmp_phi[j] + tune, tmp_phi[j+1]))
         tmp_Hp <- bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE)
         cand_llik <- dmnorm(y = y_list[[i]], mu =  tmp_Hp %*% beta_save[it - 1,],
-                            prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE)
+                            prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE) +
+                     dmnorm(y = (Hq %*% tmp_phi)[feat_list[[i]],], mu = time[template_feats],
+                            prec = 1/kap2_save[it - 1] * diag(length(template_feats)), log = TRUE)
         cand_lprior <- dmnorm(y = tmp_phi, mu = Upsilon,
                               prec = 1 / lam2_save[it - 1] * Q, log = TRUE)
         lratio <- cand_llik + cand_lprior - current_llik - current_lprior
@@ -151,6 +162,10 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
                                             mu = rep(Upsilon, n),
                                             R_inv = diag(n) %x% Q)
 
+    #-- Update Kap2 --#
+    kap2_save[it] <- update_normal_invgamma(y = unlist(lapply(1:n, function(i) wtime[[i]][feat_list[[i]],])), a = ak, b = bk,
+                                            mu = time[rep(template_feats, n)], R_inv = diag(n*length(template_feats)))
+
   }
 
   accepts <- accepts / nrun
@@ -159,11 +174,16 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])
   lam2_post <- mean(lam2_save[-c(1:nburn)])
+  kap2_post <- mean(kap2_save[-c(1:nburn)])
 
   y_post <- lapply(1:n, function(i) interp_spline(x = wtime_post[[i]], y = y_list[[i]]))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))
 }
+
+
+
+
 
 
