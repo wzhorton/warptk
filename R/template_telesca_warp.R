@@ -22,7 +22,7 @@
 
 
 
-telesca_warp <- function(y_list, feat_list, template_feats,
+template_telesca_warp <- function(y_list, feat_list, template_feats,
                          niter = 5000, nburn = 10000, int_q = 5, int_p = 20,
                          asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
                          ak = 1, bk = .01, progress = TRUE){
