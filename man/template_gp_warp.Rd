@@ -6,7 +6,7 @@
 \usage{
 template_gp_warp(y_list, feat_list, template_feats, niter = 5000,
   nburn = 10000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
-  bt = 0.1, al = 0.1, bl = 0.1, aa = 0.01, ba = 0.01,
+  bt = 0.1, al = 0.1, bl = 0.1, aa = 0.5, ba = 20,
   progress = TRUE)
 }
 \arguments{
@@ -20,7 +20,9 @@ template_gp_warp(y_list, feat_list, template_feats, niter = 5000,
 
 \item{int_p}{number of internal knots specified for the data curves}
 
-\item{asig, bsig, at, bt, al, bl, aa, ba}{hyperparameters for inverse gamma priors on model variances}
+\item{asig, bsig, at, bt, al, bl}{hyperparameters for inverse gamma priors on model variances}
+
+\item{aa, ba}{hyperparameters for the uniform prior on inverse range parameter}
 
 \item{progress}{logical; indicates whether or not to print percent progress.}
 }
