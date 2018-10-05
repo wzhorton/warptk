@@ -95,17 +95,17 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
     for(i in 1:n){
       tmp_phi <- phi[[i]]
       current_llik <- dmnorm(y = y_list[[i]], mu =  H_list[[i]] %*% beta_save[it - 1,],
-                             prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE)
+                             prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE, unnorm = TRUE)
       current_lprior <- dmnorm(y = phi[[i]], mu = Upsilon,
-                               prec = 1 / lam2_save[it - 1] * Q, log = TRUE)
+                               prec = 1 / lam2_save[it - 1] * Q, log = TRUE, unnorm = TRUE)
       for(j in 2:(q-1)){
         tmp_phi[j] <- runif(1, min = max(tmp_phi[j] - tune, tmp_phi[j-1]),
                             max = min(tmp_phi[j] + tune, tmp_phi[j+1]))
         tmp_Hp <- bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE)
         cand_llik <- dmnorm(y = y_list[[i]], mu =  tmp_Hp %*% beta_save[it - 1,],
-                            prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE)
+                            prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE, unnorm = TRUE)
         cand_lprior <- dmnorm(y = tmp_phi, mu = Upsilon,
-                              prec = 1 / lam2_save[it - 1] * Q, log = TRUE)
+                              prec = 1 / lam2_save[it - 1] * Q, log = TRUE, unnorm = TRUE)
         lratio <- cand_llik + cand_lprior - current_llik - current_lprior
 
         if(log(runif(1)) < lratio){
@@ -134,7 +134,7 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
 
     #-- Update Beta --#
     beta_save[it,] <- update_normal_normal(y = y_vec, X = H_stack, mu = mb,
-                                           Sig = sig2_save[it - 1] * diag(n*m),
+                                           Sig_inv = 1 / sig2_save[it - 1] * diag(n*m),
                                            V_inv = 1 / tau2_save[it - 1] * P)
 
     #-- Update Sig2 --#
