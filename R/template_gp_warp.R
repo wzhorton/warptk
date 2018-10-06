@@ -92,7 +92,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update alpha, M --#
     for(i in 1:n){
       current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE)
+                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = TRUE)
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
       cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
@@ -108,7 +108,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         next
       }
       cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                          prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE)
+                          prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE)
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
       if(log(runif(1)) < lratio){
