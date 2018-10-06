@@ -58,7 +58,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   lam2_save <- lapply(1:n, function(i) numeric(nrun))
   for(i in 1:n) lam2_save[[i]][1] <- 1
   alpha_save <- lapply(1:n, function(i) numeric(nrun))
-  for(i in 1:n) alpha_save[[i]][1] <- 1
+  for(i in 1:n) alpha_save[[i]][1] <- 5
 
 
   wtime <- lapply(1:n, function(i) time)
@@ -74,7 +74,8 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 5.1)
   }
 
-  M_list <- lapply(1:n, function(i) create_M(x_pts = feat_list[[i]], alpha = 1))
+  M_list <- lapply(1:n, function(i) create_M(x_pts = feat_list[[i]], alpha = 5))
+  Minv_list <- lapply(M_list, solve)
 
 
   #----- MCMC Loop -----#
@@ -91,7 +92,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update alpha, M --#
     for(i in 1:n){
       current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                             cov = lam2_save[[i]][it - 1] * M_list[[i]], log = TRUE)
+                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE)
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
       cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
@@ -101,14 +102,20 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         next
       }
       cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
+      try(cand_Minv <- chol2inv(chol(cand_M)), silent = TRUE)
+      if(class(cand_Minv) == "try-error"){
+        alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
+        next
+      }
       cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                          cov = lam2_save[[i]][it - 1] * cand_M, log = TRUE)
+                          prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE)
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
       if(log(runif(1)) < lratio){
         accepts[i] <- accepts[i] + 1
         alpha_save[[i]][it] <- cand_alpha
         M_list[[i]] <- cand_M
+        Minv_list[[i]] <- cand_Minv
       }
       else{
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
@@ -118,7 +125,8 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update wtime
     for(i in 1:n){
       wtime[[i]] <- wtime_save[[i]][it,] <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
-                                                         chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
+                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]]))
+                                                         #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
     }
 
     #-- Update H_stack --#
@@ -144,7 +152,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update Lam2 --#
     for(i in 1:n){
       lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
-                                                   mu = feat_list[[i]], R = M_list[[i]])
+                                                   mu = feat_list[[i]], R_inv = Minv_list[[i]])
     }
 
   }
