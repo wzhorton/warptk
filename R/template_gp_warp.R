@@ -102,7 +102,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         next
       }
       cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
-      try(cand_Minv <- chol2inv(chol(cand_M)), silent = TRUE)
+      cand_Minv <- try(chol2inv(chol(cand_M)), silent = TRUE)
       if(class(cand_Minv) == "try-error"){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
         next
