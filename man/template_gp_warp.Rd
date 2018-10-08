@@ -4,9 +4,9 @@
 \alias{template_gp_warp}
 \title{Template Gaussian Process Warping}
 \usage{
-template_gp_warp(y_list, feat_list, template_feats, niter = 5000,
-  nburn = 10000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
-  bt = 0.1, al = 0.1, bl = 0.1, aa = 0.5, ba = 20,
+template_gp_warp(y_list, feat_list, template_feats, niter = 1000,
+  nburn = 1000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
+  bt = 0.1, al = 0.1, bl = 0.1, aa = 1, ba = 20,
   progress = TRUE)
 }
 \arguments{

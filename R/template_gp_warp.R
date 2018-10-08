@@ -18,9 +18,9 @@
 #' @export
 
 template_gp_warp <- function(y_list, feat_list, template_feats,
-                             niter = 5000, nburn = 10000, int_p = 20,
+                             niter = 1000, nburn = 1000, int_p = 20,
                              asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
-                             aa = .5, ba = 20, progress = TRUE){
+                             aa = 1, ba = 20, progress = TRUE){
 
   #----- Fixed Values -----#
 
@@ -71,7 +71,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   H_stack <- stack(H_list)$stack
 
   create_M <- function(x_pts, y_pts = x_pts, alpha){
-    fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 5.1)
+    fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 0.5)
   }
 
   M_list <- lapply(1:n, function(i) create_M(x_pts = feat_list[[i]], alpha = 5))
@@ -92,7 +92,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update alpha, M --#
     for(i in 1:n){
       current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = TRUE)
+                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE)
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
       cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
@@ -108,7 +108,8 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         next
       }
       cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                          prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE)
+                          #prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE)
+                          cov = lam2_save[[i]][it - 1] * cand_M, log = TRUE, unnorm = FALSE)
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
       if(log(runif(1)) < lratio){
