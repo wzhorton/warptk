@@ -4,7 +4,9 @@
 \alias{landmark_warp}
 \title{Landmark Warping}
 \usage{
-landmark_warp(y_list, feat_list, template_feats)
+landmark_warp(y_list, feat_list, template_feats, niter = 1000,
+  nburn = 1000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
+  bt = 0.1, progress = TRUE)
 }
 \arguments{
 \item{y_list}{list of curves with equal length}
@@ -12,9 +14,17 @@ landmark_warp(y_list, feat_list, template_feats)
 \item{feat_list}{list of feature vectors with equal length}
 
 \item{template_feats}{a feature vector with length mathing those in feat_list}
+
+\item{niter, nburn}{MCMC iterations and burns. Total run time is the sum.}
+
+\item{int_p}{number of internal knots specified for the data curves}
+
+\item{asig, bsig, at, bt}{hyperparameters for inverse gamma priors on model variances}
+
+\item{progress}{logical; indicates whether or not to print percent progress.}
 }
 \value{
-a list of warped curves and a pointwise mean curve. List elements are
+a list of warped curves and an estimated mean curve. List elements are
   vectors with length matching the elements of y_list.
 }
 \description{
