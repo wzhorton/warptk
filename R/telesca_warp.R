@@ -161,7 +161,7 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
   tau2_post <- mean(tau2_save[-c(1:nburn)])
   lam2_post <- mean(lam2_save[-c(1:nburn)])
 
-  y_post <- lapply(1:n, function(i) as.numeric(Hlist_post %*% beta_post))
+  y_post <- lapply(1:n, function(i) as.numeric(Hlist_post[[i]] %*% beta_post))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))

@@ -166,7 +166,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   lam2_post <- lapply(lam2_save, function(lvec) mean(lvec[-c(1:nburn)]))
   alpha_post <- lapply(alpha_save, function(avec) mean(avec[-c(1:nburn)]))
 
-  y_post <- lapply(1:n, function(i) as.numeric(Hlist_post %*% beta_post))
+  y_post <- lapply(1:n, function(i) as.numeric(Hlist_post[[i]] %*% beta_post))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))
