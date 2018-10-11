@@ -15,7 +15,7 @@
 #'   vectors with length matching the elements of y_list.
 #' @export
 
-landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn = 1000,
+linear_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn = 1000,
                           int_p = 20, asig = .1, bsig = .1, at = .1, bt = .1, progress = TRUE) {
 
   #----- Fixed Values -----#
