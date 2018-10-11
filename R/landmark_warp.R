@@ -86,7 +86,7 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])
 
-  y_post <- lapply(1:n, function(i) interp_spline(x = wtime[[i]], y = y_list[[i]]))
+  y_post <- lapply(1:n, function(i) as.numeric(H_list[[i]] %*% beta_post))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   return(list(y_post = y_post, mean_post = mean_post))

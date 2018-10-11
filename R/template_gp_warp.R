@@ -159,13 +159,14 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   }
   accepts <- accepts / nrun
   wtime_post <- lapply(wtime_save, function(w) apply(w[-c(1:nburn),], 2, mean))
+  Hlist_post <- lapply(wtime_post, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
   beta_post <- apply(beta_save[-c(1:nburn),], 2, mean)
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])
   lam2_post <- lapply(lam2_save, function(lvec) mean(lvec[-c(1:nburn)]))
   alpha_post <- lapply(alpha_save, function(avec) mean(avec[-c(1:nburn)]))
 
-  y_post <- lapply(1:n, function(i) interp_spline(x = wtime_post[[i]], y = y_list[[i]]))
+  y_post <- lapply(1:n, function(i) as.numeric(Hlist_post %*% beta_post))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))
