@@ -69,13 +69,13 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
     }
 
     #-- Update Beta --#
-    beta_save[it,] <- update_normal_normal(y = y_vec, X = H_stack, mu = mb,
+    beta_save[it,] <- update_normal_normal(y = y_vec, X = Hstack, mu = mb,
                                            Sig_inv = 1 / sig2_save[it - 1] * diag(n*m),
                                            V_inv = 1 / tau2_save[it - 1] * P)
 
     #-- Update Sig2 --#
     sig2_save[it] <- update_normal_invgamma(y = y_vec, a = asig, b = bsig,
-                                            mu = H_stack %*% beta_save[it,],
+                                            mu = Hstack %*% beta_save[it,],
                                             R_inv = diag(n*m))
 
     #-- Update Tau2 --#
