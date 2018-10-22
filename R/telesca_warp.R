@@ -11,6 +11,7 @@
 #' @param int_p number of internal knots specified for the data curves
 #' @param asig,bsig,at,bt,al,bl hyperparameters for inverse gamma priors on model variances
 #' @param progress logical; indicates whether or not to print percent progress.
+#' @param debug logical; stops function right before return and enters debug mode.
 #' @return a list of warped curves, the estimated mean curve, and a vector of MCMC
 #'   acceptance rates. Curve list elements are vectors with length matching
 #'   the elements of y_list.
@@ -20,7 +21,7 @@
 
 telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p = 20,
                          asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
-                         progress = TRUE){
+                         progress = TRUE, debug = FALSE){
 
   #----- Fixed Values -----#
 
@@ -164,6 +165,7 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
   y_post <- lapply(1:n, function(i) as.numeric(Hlist_post[[i]] %*% beta_post))
   mean_post <- as.numeric(Hp %*% beta_post)
 
+  if(debug == TRUE) browser()
   return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))
 }
 

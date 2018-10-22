@@ -12,6 +12,7 @@
 #' @param asig,bsig,at,bt,al,bl hyperparameters for inverse gamma priors on model variances
 #' @param aa,ba hyperparameters for the uniform prior on inverse range parameter
 #' @param progress logical; indicates whether or not to print percent progress.
+#' @param debug logical; stops function right before return and enters debug mode.
 #' @return a list of warped curves, the estimated mean curve, and a vector of MCMC
 #'   acceptance rates. Curve list elements are vectors with length matching
 #'   the elements of y_list.
@@ -20,7 +21,7 @@
 template_gp_warp <- function(y_list, feat_list, template_feats,
                              niter = 1000, nburn = 1000, int_p = 20,
                              asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
-                             aa = 1, ba = 20, progress = TRUE){
+                             aa = 1, ba = 20, progress = TRUE, debug = FALSE){
 
   #----- Fixed Values -----#
 
@@ -169,6 +170,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   y_post <- lapply(1:n, function(i) as.numeric(Hlist_post[[i]] %*% beta_post))
   mean_post <- as.numeric(Hp %*% beta_post)
 
+  if(debug == TRUE) browser()
   return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))
 }
 

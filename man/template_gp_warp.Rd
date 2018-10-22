@@ -7,7 +7,7 @@
 template_gp_warp(y_list, feat_list, template_feats, niter = 1000,
   nburn = 1000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
   bt = 0.1, al = 0.1, bl = 0.1, aa = 1, ba = 20,
-  progress = TRUE)
+  progress = TRUE, debug = FALSE)
 }
 \arguments{
 \item{y_list}{list of curves with equal length}
@@ -25,6 +25,8 @@ template_gp_warp(y_list, feat_list, template_feats, niter = 1000,
 \item{aa, ba}{hyperparameters for the uniform prior on inverse range parameter}
 
 \item{progress}{logical; indicates whether or not to print percent progress.}
+
+\item{debug}{logical; stops function right before return and enters debug mode.}
 }
 \value{
 a list of warped curves, the estimated mean curve, and a vector of MCMC

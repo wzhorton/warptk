@@ -6,7 +6,7 @@
 \usage{
 telesca_warp(y_list, niter = 5000, nburn = 10000, int_q = 5,
   int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1, bt = 0.1,
-  al = 0.1, bl = 0.1, progress = TRUE)
+  al = 0.1, bl = 0.1, progress = TRUE, debug = FALSE)
 }
 \arguments{
 \item{y_list}{list of curves with equal length}
@@ -20,6 +20,8 @@ telesca_warp(y_list, niter = 5000, nburn = 10000, int_q = 5,
 \item{asig, bsig, at, bt, al, bl}{hyperparameters for inverse gamma priors on model variances}
 
 \item{progress}{logical; indicates whether or not to print percent progress.}
+
+\item{debug}{logical; stops function right before return and enters debug mode.}
 }
 \value{
 a list of warped curves, the estimated mean curve, and a vector of MCMC
