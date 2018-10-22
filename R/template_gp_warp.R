@@ -72,7 +72,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   H_stack <- stack(H_list)$stack
 
   create_M <- function(x_pts, y_pts = x_pts, alpha){
-    fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 0.5)
+    fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 5.1)
   }
 
   M_list <- lapply(1:n, function(i) create_M(x_pts = feat_list[[i]], alpha = 5))
