@@ -115,7 +115,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
                           prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
 
-      if(class(cand_llik == "try-error")){
+      if(class(cand_llik) == "try-error"){
         cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
                             cov = lam2_save[[i]][it - 1] * cand_M, log = TRUE, unnorm = FALSE)
       }
