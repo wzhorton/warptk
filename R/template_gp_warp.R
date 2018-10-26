@@ -92,8 +92,12 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
     #-- Update alpha, M --#
     for(i in 1:n){
-      current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE)
+      current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
+                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
+      if(class(current_llik) == "try-error"){
+        current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
+                                   cov = lam2_save[[i]][it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
+      }
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
       cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
@@ -108,9 +112,13 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
         next
       }
-      cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                          #prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE)
-                          cov = lam2_save[[i]][it - 1] * cand_M, log = TRUE, unnorm = FALSE)
+      cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
+                          prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
+
+      if(class(cand_llik == "try-error")){
+        cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
+                            cov = lam2_save[[i]][it - 1] * cand_M, log = TRUE, unnorm = FALSE)
+      }
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
       if(log(runif(1)) < lratio){
