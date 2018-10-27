@@ -163,6 +163,7 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
   lam2_post <- mean(lam2_save[-c(1:nburn)])
 
   y_post <- lapply(1:n, function(i) as.numeric(Hlist_post[[i]] %*% beta_post))
+  y_reg <- lapply(1:n, function(i) interp_spline(wtime_post[[i]], y_list[[i]]))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()

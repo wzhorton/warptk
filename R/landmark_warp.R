@@ -89,6 +89,7 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
   tau2_post <- mean(tau2_save[-c(1:nburn)])
 
   y_post <- lapply(1:n, function(i) as.numeric(H_list[[i]] %*% beta_post))
+  y_reg <- lapply(1:n, function(i) interp_spline(wtime[[i]], y_list[[i]]))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()

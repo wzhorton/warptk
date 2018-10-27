@@ -176,6 +176,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   alpha_post <- lapply(alpha_save, function(avec) mean(avec[-c(1:nburn)]))
 
   y_post <- lapply(1:n, function(i) as.numeric(Hlist_post[[i]] %*% beta_post))
+  y_reg <- lapply(1:n, function(i) interp_spline(wtime_post[[i]], y_list[[i]]))
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
