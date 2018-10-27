@@ -90,7 +90,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         cat("\b\b\b\b\b", round(it/nrun * 100), "%")
     }
 
-    #-- Update alpha, M --#
+    #-- Update alpha, M, wtime --#
     for(i in 1:n){
       current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
                              prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
@@ -104,12 +104,14 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
       if(cand_lprior == -Inf){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
+        wtime_save[[i]][it,] <- wtime[[i]]
         next
       }
       cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
       cand_Minv <- try(chol2inv(chol(cand_M)), silent = TRUE)
       if(class(cand_Minv) == "try-error"){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
+        wtime_save[[i]][it,] <- wtime[[i]]
         next
       }
       cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
@@ -121,23 +123,27 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       }
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
-      if(log(runif(1)) < lratio){
+      wtime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
+                                cand_Minv%*%(template_feats - feat_list[[i]]))
+      if(log(runif(1)) < lratio && is_monotone(wtime_tmp, strict = TRUE)){
         accepts[i] <- accepts[i] + 1
         alpha_save[[i]][it] <- cand_alpha
         M_list[[i]] <- cand_M
         Minv_list[[i]] <- cand_Minv
+        wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
       }
       else{
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
+        wtime_save[[i]][it,] <- wtime[[i]]
       }
     }
 
     #-- Update wtime
-    for(i in 1:n){
-      wtime[[i]] <- wtime_save[[i]][it,] <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
-                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]]))
+    #for(i in 1:n){
+    #  wtime[[i]] <- wtime_save[[i]][it,] <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
+    #                                                     Minv_list[[i]]%*%(template_feats - feat_list[[i]]))
                                                          #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
-    }
+    #}
 
     #-- Update H_stack --#
     for(i in 1:n){
