@@ -59,7 +59,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   lam2_save <- lapply(1:n, function(i) numeric(nrun))
   for(i in 1:n) lam2_save[[i]][1] <- 1
   alpha_save <- lapply(1:n, function(i) numeric(nrun))
-  for(i in 1:n) alpha_save[[i]][1] <- ba
+  for(i in 1:n) alpha_save[[i]][1] <- (aa + ba)/2
 
 
   wtime <- lapply(1:n, function(i) time)
@@ -168,7 +168,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
     #-- Update Lam2 --#
     for(i in 1:n){
-      lam2_save[[i]][it] <- 1#update_normal_invgamma(y = template_feats, a = al, b = bl,
+      lam2_save[[i]][it] <- 3#update_normal_invgamma(y = template_feats, a = al, b = bl,
                             #                       mu = feat_list[[i]], R_inv = Minv_list[[i]])
     }
 
