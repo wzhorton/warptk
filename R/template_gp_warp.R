@@ -21,7 +21,7 @@
 
 template_gp_warp <- function(y_list, feat_list, template_feats,
                              niter = 1000, nburn = 1000, int_p = 20,
-                             asig = .1, bsig = .1, at = .1, bt = .1, al = 1, bl = 2,
+                             asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
                              aa = 1, ba = 30, tune = 1, progress = TRUE, debug = FALSE){
 
   #----- Fixed Values -----#
@@ -168,8 +168,8 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
     #-- Update Lam2 --#
     for(i in 1:n){
-      lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
-                                                   mu = feat_list[[i]], R_inv = Minv_list[[i]])
+      lam2_save[[i]][it] <- .1#update_normal_invgamma(y = template_feats, a = al, b = bl,
+                            #                       mu = feat_list[[i]], R_inv = Minv_list[[i]])
     }
 
   }
