@@ -59,7 +59,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   lam2_save <- lapply(1:n, function(i) numeric(nrun))
   for(i in 1:n) lam2_save[[i]][1] <- 1
   alpha_save <- lapply(1:n, function(i) numeric(nrun))
-  for(i in 1:n) alpha_save[[i]][1] <- 5
+  for(i in 1:n) alpha_save[[i]][1] <- ba
 
 
   wtime <- lapply(1:n, function(i) time)
