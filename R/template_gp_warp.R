@@ -33,7 +33,9 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
   time <- seq(0, 1, len = m)
   y_vec <- unlist(y_list)
+  template_inds <- c(1, template_feats, m)
   template_feats <- c(time[1], time[template_feats], time[m])
+  feat_inds <- lapply(1:n, function(i) c(1, feat_list[[i]], m))
   feat_list <- lapply(1:n, function(i) c(time[1], time[feat_list[[i]]], time[m]))
 
   p <- int_p + r
@@ -105,14 +107,14 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
       if(cand_lprior == -Inf){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
-        wtime_save[[i]][it,] <- wtime[[i]]
+        #wtime_save[[i]][it,] <- wtime[[i]]
         next
       }
       cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
       cand_Minv <- try(chol2inv(chol(cand_M)), silent = TRUE)
       if(class(cand_Minv) == "try-error"){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
-        wtime_save[[i]][it,] <- wtime[[i]]
+        #wtime_save[[i]][it,] <- wtime[[i]]
         next
       }
       cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
@@ -148,7 +150,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update wtime
     for(i in 1:n){
       wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
-                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]])), forced = feat_list[[i]])
+                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]])), forced = feat_inds[[i]])
                                                          #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
     }
 
