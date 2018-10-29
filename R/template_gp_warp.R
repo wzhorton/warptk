@@ -148,7 +148,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update wtime
     for(i in 1:n){
       wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
-                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]])))
+                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]])), forced = feat_list[[i]])
                                                          #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
     }
 
