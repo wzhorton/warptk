@@ -100,8 +100,8 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       }
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
-      #cand_alpha <- runif(1, aa, ba)
-      cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
+      cand_alpha <- runif(1, aa, ba)
+      #cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
       cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
       if(cand_lprior == -Inf){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
