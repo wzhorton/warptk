@@ -6,7 +6,7 @@
 \usage{
 template_gp_warp(y_list, feat_list, template_feats, niter = 1000,
   nburn = 1000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
-  bt = 0.1, al = 0.1, bl = 0.1, aa = 1, ba = 20,
+  bt = 0.1, al = 0.1, bl = 0.1, aa = 1, ba = 30, tune = 5,
   progress = TRUE, debug = FALSE)
 }
 \arguments{
@@ -23,6 +23,8 @@ template_gp_warp(y_list, feat_list, template_feats, niter = 1000,
 \item{asig, bsig, at, bt, al, bl}{hyperparameters for inverse gamma priors on model variances}
 
 \item{aa, ba}{hyperparameters for the uniform prior on inverse range parameter}
+
+\item{tune}{tuning parameter for the proposal normal distribution of alpha.}
 
 \item{progress}{logical; indicates whether or not to print percent progress.}
 

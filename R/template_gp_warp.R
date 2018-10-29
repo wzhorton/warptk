@@ -11,6 +11,7 @@
 #' @param int_p number of internal knots specified for the data curves
 #' @param asig,bsig,at,bt,al,bl hyperparameters for inverse gamma priors on model variances
 #' @param aa,ba hyperparameters for the uniform prior on inverse range parameter
+#' @param tune tuning parameter for the proposal normal distribution of alpha.
 #' @param progress logical; indicates whether or not to print percent progress.
 #' @param debug logical; stops function right before return and enters debug mode.
 #' @return a list of warped curves, the estimated mean curve, and a vector of MCMC
@@ -21,7 +22,7 @@
 template_gp_warp <- function(y_list, feat_list, template_feats,
                              niter = 1000, nburn = 1000, int_p = 20,
                              asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
-                             aa = 1, ba = 20, progress = TRUE, debug = FALSE){
+                             aa = 1, ba = 30, tune = 5, progress = TRUE, debug = FALSE){
 
   #----- Fixed Values -----#
 
@@ -44,7 +45,6 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
   mb <- rep(0,p)
 
-  tune <- 5
   accepts <- numeric(n)
 
   nrun <- nburn + niter
@@ -100,7 +100,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       }
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
-      cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
+      cand_alpha <- runif(1, aa, ba)#rnorm(1, alpha_save[[i]][it - 1], tune)
       cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
       if(cand_lprior == -Inf){
         alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
