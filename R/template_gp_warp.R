@@ -22,7 +22,7 @@
 template_gp_warp <- function(y_list, feat_list, template_feats,
                              niter = 1000, nburn = 1000, int_p = 20,
                              asig = .1, bsig = .1, at = .1, bt = .1, al = 1, bl = 2,
-                             aa = 1, ba = 30, tune = 5, progress = TRUE, debug = FALSE){
+                             aa = 1, ba = 30, tune = 1, progress = TRUE, debug = FALSE){
 
   #----- Fixed Values -----#
 
