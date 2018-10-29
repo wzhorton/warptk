@@ -124,27 +124,33 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       }
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
-      wtime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
-                                cand_Minv%*%(template_feats - feat_list[[i]]))
-      if(log(runif(1)) < lratio && is_monotone(wtime_tmp, strict = TRUE)){
+      #wtime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
+      #                          cand_Minv%*%(template_feats - feat_list[[i]]))
+      if(log(runif(1)) < lratio){ #&& is_monotone(wtime_tmp, strict = TRUE)){
         accepts[i] <- accepts[i] + 1
         alpha_save[[i]][it] <- 10#cand_alpha
         M_list[[i]] <- cand_M
         Minv_list[[i]] <- cand_Minv
-        wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
+        #wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
       }
       else{
         alpha_save[[i]][it] <- 10#alpha_save[[i]][it - 1]
-        wtime_save[[i]][it,] <- wtime[[i]]
+        #wtime_save[[i]][it,] <- wtime[[i]]
       }
     }
 
+    #-- Update Lam2 --#
+    for(i in 1:n){#3
+      lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
+                                                   mu = feat_list[[i]], R_inv = Minv_list[[i]])
+    }
+
     #-- Update wtime
-    #for(i in 1:n){
-    #  wtime[[i]] <- wtime_save[[i]][it,] <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
-    #                                                     Minv_list[[i]]%*%(template_feats - feat_list[[i]]))
+    for(i in 1:n){
+      wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
+                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]])))
                                                          #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
-    #}
+    }
 
     #-- Update H_stack --#
     for(i in 1:n){
@@ -165,12 +171,6 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update Tau2 --#
     tau2_save[it] <- update_normal_invgamma(y = beta_save[it,], a = at, b = bt,
                                             mu = mb, R_inv = P)
-
-    #-- Update Lam2 --#
-    for(i in 1:n){#3
-      lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
-                                                   mu = feat_list[[i]], R_inv = Minv_list[[i]])
-    }
 
   }
   accepts <- accepts / nrun
