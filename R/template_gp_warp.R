@@ -168,7 +168,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
     #-- Update Lam2 --#
     for(i in 1:n){
-      lam2_save[[i]][it] <- .1#update_normal_invgamma(y = template_feats, a = al, b = bl,
+      lam2_save[[i]][it] <- 1#update_normal_invgamma(y = template_feats, a = al, b = bl,
                             #                       mu = feat_list[[i]], R_inv = Minv_list[[i]])
     }
 
