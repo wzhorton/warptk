@@ -130,13 +130,13 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       #                          cand_Minv%*%(template_feats - feat_list[[i]]))
       if(log(runif(1)) < lratio){ #&& is_monotone(wtime_tmp, strict = TRUE)){
         accepts[i] <- accepts[i] + 1
-        alpha_save[[i]][it] <- 10#cand_alpha
+        alpha_save[[i]][it] <- cand_alpha
         M_list[[i]] <- cand_M
         Minv_list[[i]] <- cand_Minv
         #wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
       }
       else{
-        alpha_save[[i]][it] <- 10#alpha_save[[i]][it - 1]
+        alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
         #wtime_save[[i]][it,] <- wtime[[i]]
       }
     }
