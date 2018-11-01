@@ -149,7 +149,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #                                               mu = feat_list[[i]], R_inv = Minv_list[[i]])
     #}
     lam2_save[it] <- update_normal_invgamma(y = rep(template_feats, n), a = al, b = bl,
-                                            mu = stack(feat_list)$stack, R_inv = Matrix::bdiag(Minv_list))
+                                            mu = stack(feat_list)$stack, R_inv = as.matrix(Matrix::bdiag(Minv_list)))
 
     #-- Update wtime
     for(i in 1:n){
