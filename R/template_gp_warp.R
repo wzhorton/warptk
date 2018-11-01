@@ -58,8 +58,10 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   sig2_save[1] <- 1
   tau2_save <- numeric(nrun)
   tau2_save[1] <- 1
-  lam2_save <- lapply(1:n, function(i) numeric(nrun))
-  for(i in 1:n) lam2_save[[i]][1] <- 1
+  #lam2_save <- lapply(1:n, function(i) numeric(nrun))
+  #for(i in 1:n) lam2_save[[i]][1] <- 1
+  lam2_save <- numeric(nrun)
+  lam2_save[1] <- 1
   alpha_save <- lapply(1:n, function(i) numeric(nrun))
   for(i in 1:n) alpha_save[[i]][1] <- (aa + ba)/2
 
@@ -95,10 +97,10 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #-- Update alpha, M, wtime --#
     for(i in 1:n){
       current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
-                             prec = 1 / lam2_save[[i]][it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
+                             prec = 1 / lam2_save[it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
       if(class(current_llik) == "try-error"){
         current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                                   cov = lam2_save[[i]][it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
+                                   cov = lam2_save[it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
       }
       current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
 
@@ -118,11 +120,11 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         next
       }
       cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
-                          prec = 1 / lam2_save[[i]][it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
+                          prec = 1 / lam2_save[it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
 
       if(class(cand_llik) == "try-error"){
         cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                            cov = lam2_save[[i]][it - 1] * cand_M, log = TRUE, unnorm = FALSE)
+                            cov = lam2_save[it - 1] * cand_M, log = TRUE, unnorm = FALSE)
       }
 
       lratio <- cand_llik + cand_lprior - current_llik - current_lprior
@@ -142,10 +144,12 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     }
 
     #-- Update Lam2 --#
-    for(i in 1:n){#3
-      lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
-                                                   mu = feat_list[[i]], R_inv = Minv_list[[i]])
-    }
+    #for(i in 1:n){#3
+    #  lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
+    #                                               mu = feat_list[[i]], R_inv = Minv_list[[i]])
+    #}
+    lam2_save[it] <- update_normal_invgamma(y = rep(template_feats, n), a = al, b = bl,
+                                            mu = stack(feat_list)$stack, R_inv = Matrix::bdiag(Minv_list))
 
     #-- Update wtime
     for(i in 1:n){
