@@ -47,7 +47,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
   mb <- rep(0,p)
 
-  accepts <- numeric(n)
+  accepts <- 0 #numeric(n)
 
   nrun <- nburn + niter
 
@@ -62,9 +62,10 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   #for(i in 1:n) lam2_save[[i]][1] <- 1
   lam2_save <- numeric(nrun)
   lam2_save[1] <- 1
-  alpha_save <- lapply(1:n, function(i) numeric(nrun))
-  for(i in 1:n) alpha_save[[i]][1] <- (aa + ba)/2
-
+  #alpha_save <- lapply(1:n, function(i) numeric(nrun))
+  #for(i in 1:n) alpha_save[[i]][1] <- (aa + ba)/2
+  alpha_save <- numeric(nrun)
+  alpha_save[1] <- (aa + ba)/2
 
   wtime <- lapply(1:n, function(i) time)
   wtime_save <- lapply(1:n, function(i){
@@ -95,54 +96,69 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     }
 
     #-- Update alpha, M, wtime --#
-    for(i in 1:n){
-      current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
-                             prec = 1 / lam2_save[it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
-      if(class(current_llik) == "try-error"){
-        current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                                   cov = lam2_save[it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
-      }
-      current_lprior <- dunif(alpha_save[[i]][it - 1], min = aa, max = ba, log = TRUE)
+    #for(i in 1:n){
+    #  current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
+    #                         prec = 1 / lam2_save[it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
+    current_llik <- try(dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
+                               prec = 1 / lam2_save[it - 1] * as.matrix(Matrix::bdiag(Minv_list)), log = TRUE, unnorm = FALSE), silent = TRUE)
+    #  if(class(current_llik) == "try-error"){
+    #    current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
+    #                               cov = lam2_save[it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
+    #  }
+    if(class(current_llik) == "try-error"){
+      current_llik <- dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
+                             cov = lam2_save[it - 1] * as.matrix(Matrix::bdiag(M_list)), log = TRUE, unnorm = FALSE)
+    }
+    current_lprior <- dunif(alpha_save[it - 1], min = aa, max = ba, log = TRUE)
 
-      #cand_alpha <- runif(1, aa, ba)
-      cand_alpha <- rnorm(1, alpha_save[[i]][it - 1], tune)
-      cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
-      if(cand_lprior == -Inf){
-        alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
+    #  #cand_alpha <- runif(1, aa, ba)
+    cand_alpha <- rnorm(1, alpha_save[it - 1], tune)
+    cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
+    if(cand_lprior == -Inf){
+      alpha_save[it] <- alpha_save[it - 1]
+      #wtime_save[[i]][it,] <- wtime[[i]]
+      #next
+    } else{
+      #  cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
+      cand_M_list <- lapply(1:n, function(i) create_M(x_pts = feat_list[[i]], alpha = cand_alpha))
+      #  cand_Minv <- try(chol2inv(chol(cand_M)), silent = TRUE)
+      cand_Minv_list <- try(lapply(1:n, function(i) chol2inv(chol(cand_M_list[[i]]))), silent = TRUE)
+      if(class(cand_Minv_list) == "try-error"){
+        alpha_save[it] <- alpha_save[it - 1]
         #wtime_save[[i]][it,] <- wtime[[i]]
-        next
-      }
-      cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
-      cand_Minv <- try(chol2inv(chol(cand_M)), silent = TRUE)
-      if(class(cand_Minv) == "try-error"){
-        alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
-        #wtime_save[[i]][it,] <- wtime[[i]]
-        next
-      }
-      cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
-                          prec = 1 / lam2_save[it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
+        #next
+      } else{
+        #  cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
+        #                      prec = 1 / lam2_save[it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
+        cand_llik <- try(dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
+                                prec = 1 / lam2_save[it - 1] * as.matrix(Matrix::bdiag(cand_Minv_list)), log = TRUE, unnorm = FALSE), silent = TRUE)
+        #
+        #  if(class(cand_llik) == "try-error"){
+        #    cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
+        #                        cov = lam2_save[it - 1] * cand_M, log = TRUE, unnorm = FALSE)
+        #  }
+        if(class(cand_llik) == "try-error"){
+          cand_llik <- dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
+                              cov = lam2_save[it - 1] * as.matrix(Matrix::bdiag(cand_M_list)), log = TRUE, unnorm = FALSE)
+        }
 
-      if(class(cand_llik) == "try-error"){
-        cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
-                            cov = lam2_save[it - 1] * cand_M, log = TRUE, unnorm = FALSE)
-      }
-
-      lratio <- cand_llik + cand_lprior - current_llik - current_lprior
-      #wtime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
-      #                          cand_Minv%*%(template_feats - feat_list[[i]]))
-      if(log(runif(1)) < lratio){ #&& is_monotone(wtime_tmp, strict = TRUE)){
-        accepts[i] <- accepts[i] + 1
-        alpha_save[[i]][it] <- cand_alpha
-        M_list[[i]] <- cand_M
-        Minv_list[[i]] <- cand_Minv
-        #wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
-      }
-      else{
-        alpha_save[[i]][it] <- alpha_save[[i]][it - 1]
-        #wtime_save[[i]][it,] <- wtime[[i]]
+        lratio <- cand_llik + cand_lprior - current_llik - current_lprior
+        #wtime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
+        #                          cand_Minv%*%(template_feats - feat_list[[i]]))
+        if(log(runif(1)) < lratio){ #&& is_monotone(wtime_tmp, strict = TRUE)){
+          accepts <- accepts + 1
+          alpha_save[it] <- cand_alpha
+          M_list <- cand_M_list
+          Minv_list <- cand_Minv_list
+          #wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
+        }
+        else{
+          alpha_save[it] <- alpha_save[it - 1]
+          #wtime_save[[i]][it,] <- wtime[[i]]
+        }
+        #}
       }
     }
-
     #-- Update Lam2 --#
     #for(i in 1:n){#3
     #  lam2_save[[i]][it] <- update_normal_invgamma(y = template_feats, a = al, b = bl,
@@ -153,9 +169,9 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
     #-- Update wtime
     for(i in 1:n){
-      wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[[i]][it]) %*%
-                                                         Minv_list[[i]]%*%(template_feats - feat_list[[i]])), forced = feat_inds[[i]])
-                                                         #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
+      wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[it]) %*%
+                                                                    Minv_list[[i]]%*%(template_feats - feat_list[[i]])), forced = feat_inds[[i]])
+      #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
     }
 
     #-- Update H_stack --#
