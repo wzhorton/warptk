@@ -40,11 +40,10 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
   p <- int_p + r
   knot_loc_p <- seq(time[1], time[m], len = int_p+2)[-c(1,int_p+2)]
-  Hp <- format_Matrix(bs(time, knots = knot_loc_p, intercept = T), sparse = TRUE)
+  Hp <- bs(time, knots = knot_loc_p, intercept = T)
 
   P <- K1(p)
   P[1,1] <- 2
-  P <- format_Matrix(P, sparse = TRUE, symmetric = TRUE)
 
   mb <- rep(0,p)
 

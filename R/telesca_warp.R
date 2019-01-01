@@ -50,7 +50,7 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
   Q <- K1(q)
   P[1,1] <- 2
   Q[1,1] <- 2
-  bigQ <- bdiag(replicate(n, Q, simplify = FALSE))
+  bigQ <- Matrix::bdiag(replicate(n, Q, simplify = FALSE))
   mb <- rep(0,p)
 
   tune <- .005
