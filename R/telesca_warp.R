@@ -103,7 +103,7 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
       for(j in 2:(q-1)){
         tmp_phi[j] <- runif(1, min = max(tmp_phi[j] - tune, tmp_phi[j-1]),
                             max = min(tmp_phi[j] + tune, tmp_phi[j+1]))
-        tmp_Hp <- format_Matrix(bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE), sparse = TRUE)
+        tmp_Hp <- bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE)
         cand_llik <- dmnorm(y = y_list[[i]], mu =  tmp_Hp %*% beta_save[it - 1,],
                             prec = 1 / sig2_save[it - 1] * diag_m, log = TRUE, unnorm = TRUE)
         cand_lprior <- dmnorm(y = tmp_phi, mu = Upsilon,
