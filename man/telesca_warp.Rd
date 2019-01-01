@@ -4,7 +4,7 @@
 \alias{telesca_warp}
 \title{Telesca Hierarchical Warping}
 \usage{
-telesca_warp(y_list, niter = 5000, nburn = 10000, int_q = 5,
+telesca_warp(y_list, niter = 1000, nburn = 1000, int_q = 5,
   int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1, bt = 0.1,
   al = 0.1, bl = 0.1, progress = TRUE, debug = FALSE)
 }

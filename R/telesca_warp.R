@@ -19,7 +19,7 @@
 
 
 
-telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p = 20,
+telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 20,
                          asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
                          progress = TRUE, debug = FALSE){
 
@@ -50,6 +50,7 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
   Q <- K1(q)
   P[1,1] <- 2
   Q[1,1] <- 2
+  bigQ <- bdiag(replicate(n, Q, simplify = FALSE))
   mb <- rep(0,p)
 
   tune <- .005
@@ -78,33 +79,33 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
     return(out)
   })
   H_list <- lapply(1:n, function(i) Hp)
-  H_stack <- stack(H_list)$stack
+  H_stack <- stack_Matrix(H_list)
+
+  diag_m <- diag(m)
+  diag_nm <- diag(n*m)
 
 
   #----- MCMC Loop -----#
 
-  cat("Progress:  0 %")
+  if(progress == TRUE) bar <- txtProgressBar(min = 2, max = nrun, style = 3)
   for(it in 2:nrun){
     if (progress == TRUE) {
-      if (((it%%round(nrun * 0.01)) == 0) && it/nrun < 0.1)
-        cat("\b\b\b\b", round(it/nrun * 100), "%")
-      if (((it%%round(nrun * 0.01)) == 0) && it/nrun >= 0.1)
-        cat("\b\b\b\b\b", round(it/nrun * 100), "%")
+      setTxtProgressBar(bar, it)
     }
 
     #-- Update Phi --#
     for(i in 1:n){
       tmp_phi <- phi[[i]]
       current_llik <- dmnorm(y = y_list[[i]], mu =  H_list[[i]] %*% beta_save[it - 1,],
-                             prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE, unnorm = TRUE)
+                             prec = 1 / sig2_save[it - 1] * diag_m, log = TRUE, unnorm = TRUE)
       current_lprior <- dmnorm(y = phi[[i]], mu = Upsilon,
                                prec = 1 / lam2_save[it - 1] * Q, log = TRUE, unnorm = TRUE)
       for(j in 2:(q-1)){
         tmp_phi[j] <- runif(1, min = max(tmp_phi[j] - tune, tmp_phi[j-1]),
                             max = min(tmp_phi[j] + tune, tmp_phi[j+1]))
-        tmp_Hp <- bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE)
+        tmp_Hp <- format_Matrix(bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE), sparse = TRUE)
         cand_llik <- dmnorm(y = y_list[[i]], mu =  tmp_Hp %*% beta_save[it - 1,],
-                            prec = 1 / sig2_save[it - 1] * diag(m), log = TRUE, unnorm = TRUE)
+                            prec = 1 / sig2_save[it - 1] * diag_m, log = TRUE, unnorm = TRUE)
         cand_lprior <- dmnorm(y = tmp_phi, mu = Upsilon,
                               prec = 1 / lam2_save[it - 1] * Q, log = TRUE, unnorm = TRUE)
         lratio <- cand_llik + cand_lprior - current_llik - current_lprior
@@ -122,7 +123,7 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
     }
 
     #-- Update wtime --#
-    wtime <- lapply(1:n, function(i) Hq %*% phi[[i]])
+    wtime <- lapply(1:n, function(i) as.numeric(Hq %*% phi[[i]]))
     for(i in 1:n){
       wtime_save[[i]][it,] <- wtime[[i]]
     }
@@ -131,17 +132,17 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
     H_list <- lapply(1:n, function(i) bs(wtime[[i]], knots = knot_loc_p, intercept = TRUE))
 
     #-- Update H_stack --#
-    H_stack <- stack(H_list)$stack
+    H_stack <- stack_Matrix(H_list)
 
     #-- Update Beta --#
     beta_save[it,] <- update_normal_normal(y = y_vec, X = H_stack, mu = mb,
-                                           Sig_inv = 1 / sig2_save[it - 1] * diag(n*m),
+                                           Sig_inv = 1 / sig2_save[it - 1] * diag_nm,
                                            V_inv = 1 / tau2_save[it - 1] * P)
 
     #-- Update Sig2 --#
     sig2_save[it] <- update_normal_invgamma(y = y_vec, a = asig, b = bsig,
                                             mu = H_stack %*% beta_save[it,],
-                                            R_inv = diag(n*m))
+                                            R_inv = diag_nm)
 
     #-- Update Tau2 --#
     tau2_save[it] <- update_normal_invgamma(y = beta_save[it,], a = at, b = bt,
@@ -150,10 +151,10 @@ telesca_warp <- function(y_list, niter = 5000, nburn = 10000, int_q = 5, int_p =
     #-- Update Lam2 --#
     lam2_save[it] <- update_normal_invgamma(y = unlist(phi), a = al, b = bl,
                                             mu = rep(Upsilon, n),
-                                            R_inv = diag(n) %x% Q)
+                                            R_inv = bigQ)
 
   }
-
+  close(bar)
   accepts <- accepts / nrun
   wtime_post <- lapply(wtime_save, function(w) apply(w[-c(1:nburn),], 2, mean))
   Hlist_post <- lapply(wtime_post, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))

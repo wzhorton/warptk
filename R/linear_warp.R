@@ -38,6 +38,8 @@ linear_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn =
   P[1,1] <- 2
   mb <- rep(0,p)
 
+  diag_nm <- diag(n*m)
+
 
   #----- Save Structures -----#
 
@@ -59,33 +61,32 @@ linear_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn =
                                          intercept = FALSE)$coefficients * time)
 
   H_list <- lapply(wtime, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
-  Hstack <- stack(H_list)$stack
+  Hstack <- stack_Matrix(H_list)
 
   #----- MCMC Loop -----#
 
-  cat("Progress:  0 %")
+  #cat("Progress:  0 %")
+  if(progress == TRUE) bar <- txtProgressBar(min = 2, max = nrun, style = 3)
   for(it in 2:nrun){
     if (progress == TRUE) {
-      if (((it%%round(nrun * 0.01)) == 0) && it/nrun < 0.1)
-        cat("\b\b\b\b", round(it/nrun * 100), "%")
-      if (((it%%round(nrun * 0.01)) == 0) && it/nrun >= 0.1)
-        cat("\b\b\b\b\b", round(it/nrun * 100), "%")
+      setTxtProgressBar(bar, it)
     }
 
     #-- Update Beta --#
     beta_save[it,] <- update_normal_normal(y = y_vec, X = Hstack, mu = mb,
-                                           Sig_inv = 1 / sig2_save[it - 1] * diag(n*m),
+                                           Sig_inv = 1 / sig2_save[it - 1] * diag_nm,
                                            V_inv = 1 / tau2_save[it - 1] * P)
 
     #-- Update Sig2 --#
     sig2_save[it] <- update_normal_invgamma(y = y_vec, a = asig, b = bsig,
                                             mu = Hstack %*% beta_save[it,],
-                                            R_inv = diag(n*m))
+                                            R_inv = diag_nm)
 
     #-- Update Tau2 --#
     tau2_save[it] <- update_normal_invgamma(y = beta_save[it,], a = at, b = bt,
                                             mu = mb, R_inv = P)
   }
+  close(bar)
   beta_post <- apply(beta_save[-c(1:nburn),], 2, mean)
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])

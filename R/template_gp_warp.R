@@ -40,10 +40,11 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
   p <- int_p + r
   knot_loc_p <- seq(time[1], time[m], len = int_p+2)[-c(1,int_p+2)]
-  Hp <- splines::bs(time, knots = knot_loc_p, intercept = T)
+  Hp <- format_Matrix(bs(time, knots = knot_loc_p, intercept = T), sparse = TRUE)
 
   P <- K1(p)
   P[1,1] <- 2
+  P <- format_Matrix(P, sparse = TRUE, symmetric = TRUE)
 
   mb <- rep(0,p)
 
@@ -74,25 +75,21 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     return(out)
   })
   H_list <- lapply(1:n, function(i) Hp)
-  H_stack <- stack(H_list)$stack
+  H_stack <- stack_Matrix(H_list)
 
   create_M <- function(x_pts, y_pts = x_pts, alpha){
-    fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 5.1)
-  }
+    fields::Matern(fields::rdist(x_pts, y_pts), alpha = alpha, smoothness = 5.1)}
 
   M_list <- lapply(1:n, function(i) create_M(x_pts = feat_list[[i]], alpha = (aa + ba)/2))
-  Minv_list <- lapply(M_list, solve)
+  Minv_list <- lapply(M_list, function(m) chol2inv(chol(m)))
 
 
   #----- MCMC Loop -----#
 
-  cat("Progress:  0 %")
+  if(progress == TRUE) bar <- txtProgressBar(min = 2, max = nrun, style = 3)
   for(it in 2:nrun){
     if (progress == TRUE) {
-      if (((it%%round(nrun * 0.01)) == 0) && it/nrun < 0.1)
-        cat("\b\b\b\b", round(it/nrun * 100), "%")
-      if (((it%%round(nrun * 0.01)) == 0) && it/nrun >= 0.1)
-        cat("\b\b\b\b\b", round(it/nrun * 100), "%")
+      setTxtProgressBar(bar, it)
     }
 
     #-- Update alpha, M, wtime --#
@@ -100,14 +97,14 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #  current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
     #                         prec = 1 / lam2_save[it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
     current_llik <- try(dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                               prec = 1 / lam2_save[it - 1] * as.matrix(Matrix::bdiag(Minv_list)), log = TRUE, unnorm = FALSE), silent = TRUE)
+                               prec = 1 / lam2_save[it - 1] * bdiag(Minv_list), log = TRUE, unnorm = FALSE), silent = TRUE)
     #  if(class(current_llik) == "try-error"){
     #    current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
     #                               cov = lam2_save[it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
     #  }
     if(class(current_llik) == "try-error"){
       current_llik <- dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                             cov = lam2_save[it - 1] * as.matrix(Matrix::bdiag(M_list)), log = TRUE, unnorm = FALSE)
+                             cov = lam2_save[it - 1] * bdiag(M_list), log = TRUE, unnorm = FALSE)
     }
     current_lprior <- dunif(alpha_save[it - 1], min = aa, max = ba, log = TRUE)
 
@@ -131,7 +128,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         #  cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
         #                      prec = 1 / lam2_save[it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
         cand_llik <- try(dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                                prec = 1 / lam2_save[it - 1] * as.matrix(Matrix::bdiag(cand_Minv_list)), log = TRUE, unnorm = FALSE), silent = TRUE)
+                                prec = 1 / lam2_save[it - 1] * bdiag(cand_Minv_list), log = TRUE, unnorm = FALSE), silent = TRUE)
         #
         #  if(class(cand_llik) == "try-error"){
         #    cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
@@ -139,7 +136,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         #  }
         if(class(cand_llik) == "try-error"){
           cand_llik <- dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                              cov = lam2_save[it - 1] * as.matrix(Matrix::bdiag(cand_M_list)), log = TRUE, unnorm = FALSE)
+                              cov = lam2_save[it - 1] * bdiag(cand_M_list), log = TRUE, unnorm = FALSE)
         }
 
         lratio <- cand_llik + cand_lprior - current_llik - current_lprior
@@ -165,7 +162,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #                                               mu = feat_list[[i]], R_inv = Minv_list[[i]])
     #}
     lam2_save[it] <- update_normal_invgamma(y = rep(template_feats, n), a = al, b = bl,
-                                            mu = stack(feat_list)$stack, R_inv = as.matrix(Matrix::bdiag(Minv_list)))
+                                            mu = stack(feat_list)$stack, R_inv = bdiag(Minv_list))
 
     #-- Update wtime
     for(i in 1:n){
@@ -176,25 +173,26 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
     #-- Update H_stack --#
     for(i in 1:n){
-      H_list[[i]] <- splines::bs(wtime[[i]], knots = knot_loc_p, intercept = T)
+      H_list[[i]] <- bs(wtime[[i]], knots = knot_loc_p, intercept = T)
     }
-    H_stack <- stack(H_list)$stack
+    H_stack <- stack_Matrix(H_list)
 
     #-- Update Beta --#
     beta_save[it,] <- update_normal_normal(y = y_vec, X = H_stack, mu = mb,
-                                           Sig_inv = 1 / sig2_save[it - 1] * diag(n*m),
+                                           Sig_inv = 1 / sig2_save[it - 1] * diag_nm,
                                            V_inv = 1 / tau2_save[it - 1] * P)
 
     #-- Update Sig2 --#
     sig2_save[it] <- update_normal_invgamma(y = y_vec, a = asig, b = bsig,
                                             mu = H_stack %*% beta_save[it,],
-                                            R_inv = diag(n*m))
+                                            R_inv = diag_nm)
 
     #-- Update Tau2 --#
     tau2_save[it] <- update_normal_invgamma(y = beta_save[it,], a = at, b = bt,
                                             mu = mb, R_inv = P)
 
   }
+  close(bar)
   accepts <- accepts / nrun
   wtime_post <- lapply(wtime_save, function(w) apply(w[-c(1:nburn),], 2, mean))
   Hlist_post <- lapply(wtime_post, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
