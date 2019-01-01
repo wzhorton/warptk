@@ -46,6 +46,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   P[1,1] <- 2
 
   mb <- rep(0,p)
+  diag_nm <- diag(n*m)
 
   accepts <- 0 #numeric(n)
 
