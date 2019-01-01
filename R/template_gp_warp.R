@@ -96,14 +96,14 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #  current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
     #                         prec = 1 / lam2_save[it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
     current_llik <- try(dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                               prec = 1 / lam2_save[it - 1] * bdiag(Minv_list), log = TRUE, unnorm = FALSE), silent = TRUE)
+                               prec = 1 / lam2_save[it - 1] * Matrix::bdiag(Minv_list), log = TRUE, unnorm = FALSE), silent = TRUE)
     #  if(class(current_llik) == "try-error"){
     #    current_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
     #                               cov = lam2_save[it - 1] * M_list[[i]], log = TRUE, unnorm = FALSE)
     #  }
     if(class(current_llik) == "try-error"){
       current_llik <- dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                             cov = lam2_save[it - 1] * bdiag(M_list), log = TRUE, unnorm = FALSE)
+                             cov = lam2_save[it - 1] * Matrix::bdiag(M_list), log = TRUE, unnorm = FALSE)
     }
     current_lprior <- dunif(alpha_save[it - 1], min = aa, max = ba, log = TRUE)
 
@@ -127,7 +127,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         #  cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
         #                      prec = 1 / lam2_save[it - 1] * cand_Minv, log = TRUE, unnorm = TRUE), silent = TRUE)
         cand_llik <- try(dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                                prec = 1 / lam2_save[it - 1] * bdiag(cand_Minv_list), log = TRUE, unnorm = FALSE), silent = TRUE)
+                                prec = 1 / lam2_save[it - 1] * Matrix::bdiag(cand_Minv_list), log = TRUE, unnorm = FALSE), silent = TRUE)
         #
         #  if(class(cand_llik) == "try-error"){
         #    cand_llik <- dmnorm(y = template_feats, mu = feat_list[[i]],
@@ -135,7 +135,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         #  }
         if(class(cand_llik) == "try-error"){
           cand_llik <- dmnorm(y = rep(template_feats,n), mu = stack(feat_list)$stack,
-                              cov = lam2_save[it - 1] * bdiag(cand_M_list), log = TRUE, unnorm = FALSE)
+                              cov = lam2_save[it - 1] * Matrix::bdiag(cand_M_list), log = TRUE, unnorm = FALSE)
         }
 
         lratio <- cand_llik + cand_lprior - current_llik - current_lprior
@@ -161,7 +161,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     #                                               mu = feat_list[[i]], R_inv = Minv_list[[i]])
     #}
     lam2_save[it] <- update_normal_invgamma(y = rep(template_feats, n), a = al, b = bl,
-                                            mu = stack(feat_list)$stack, R_inv = bdiag(Minv_list))
+                                            mu = stack(feat_list)$stack, R_inv = Matrix::bdiag(Minv_list))
 
     #-- Update wtime
     for(i in 1:n){
