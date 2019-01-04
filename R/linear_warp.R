@@ -32,7 +32,8 @@ linear_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn =
 
   p <- int_p + r
   knot_loc_p <- seq(time[1], time[m], len = int_p+2)[-c(1,int_p+2)]
-  Hp <- bs(time, knots = knot_loc_p, intercept = T)
+  #Hp <- bs(time, knots = knot_loc_p, intercept = T)
+  Hp <- cbs(time, int_p)
 
   P <- K1(p)
   P[1,1] <- 2
@@ -60,7 +61,8 @@ linear_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn =
                                          time[template_feats],
                                          intercept = FALSE)$coefficients * time)
 
-  H_list <- lapply(wtime, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
+  #H_list <- lapply(wtime, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
+  H_list <- lapply(wtime, function(w) cbs(w, int_p))
   Hstack <- stack_Matrix(H_list)
 
   #----- MCMC Loop -----#
@@ -96,5 +98,5 @@ linear_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn =
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
-  return(list(y_post = y_post, mean_post = mean_post))
+  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post))
 }

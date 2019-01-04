@@ -32,7 +32,8 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
 
   p <- int_p + r
   knot_loc_p <- seq(time[1], time[m], len = int_p+2)[-c(1,int_p+2)]
-  Hp <- bs(time, knots = knot_loc_p, intercept = T)
+  #Hp <- bs(time, knots = knot_loc_p, intercept = T)
+  Hp <- cbs(time, int_p)
 
   P <- K1(p)
   P[1,1] <- 2
@@ -57,7 +58,8 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
 
   wtime <- lapply(1:n, function(i) approx(x = c(0, time[feat_list[[i]]], 1),
                                           y = c(0, time[template_feats], 1), xout = time)$y)
-  H_list <- lapply(wtime, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
+  #H_list <- lapply(wtime, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
+  H_list <- lapply(wtime, function(w) cbs(w, int_p))
   Hstack <- stack_Matrix(H_list)
 
   #----- MCMC Loop -----#
@@ -92,5 +94,5 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
-  return(list(y_post = y_post, mean_post = mean_post))
+  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post))
 }

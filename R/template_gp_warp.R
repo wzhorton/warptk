@@ -40,7 +40,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
 
   p <- int_p + r
   knot_loc_p <- seq(time[1], time[m], len = int_p+2)[-c(1,int_p+2)]
-  Hp <- bs(time, knots = knot_loc_p, intercept = T)
+  Hp <- cbs(time, int_p)
 
   P <- K1(p)
   P[1,1] <- 2
@@ -195,7 +195,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   close(bar)
   accepts <- accepts / nrun
   wtime_post <- lapply(wtime_save, function(w) apply(w[-c(1:nburn),], 2, mean))
-  Hlist_post <- lapply(wtime_post, function(w) bs(w, knots = knot_loc_p, intercept = TRUE))
+  Hlist_post <- lapply(wtime_post, function(w) cbs(w, int_p))
   beta_post <- apply(beta_save[-c(1:nburn),], 2, mean)
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])
@@ -207,6 +207,6 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
-  return(list(y_post = y_post, mean_post = mean_post, accepts = accepts))
+  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post, accepts = accepts))
 }
 
