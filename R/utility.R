@@ -14,9 +14,22 @@
 #' @export
 
 interp_spline <- function(x, y, nout = length(y)) {
-  ind_out <- seq(min(x), max(x), len = nout)
-  spfit <- splinefun(x, y)
-  return(spfit(ind_out))
+  nout <- force(nout)
+  runlen <- rle(x)
+  reps <- which(runlen$lengths != 1)
+  if(length(reps) > 0){
+    runpos <- cumsum(runlen$lengths) - runlen$lengths + 1
+
+    for(i in reps){
+      run_inds <- runpos[i]:(runpos[i]+runlen$lengths[i] - 1)
+      y[runpos[i]] <- mean(y[run_inds])
+      x[run_inds[-1]] <- NA
+      y[run_inds[-1]] <- NA
+    }
+    x <- na.omit(x)
+    y <- na.omit(y)
+  }
+  return(spline(x, y, n = nout)$y)
 }
 
 
