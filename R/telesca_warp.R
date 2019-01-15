@@ -172,7 +172,8 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
-  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post, accepts = accepts))
+  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post,
+              accepts = accepts, beta_chains = beta_save[-c(1:nburn),]))
 }
 
 
