@@ -6,7 +6,7 @@
 #' Interpolates out equally spaced values by fitting a cubic spline on given points and
 #' matching the endpoints. Often used to redefine a curve with warped time axis on an
 #' even time basis. Note that quality of interpolation decreases with inadequate density
-#' of defining points.
+#' of defining points. If ties are found, linear interpolation is used.
 #'
 #' @param x,y coordinate vectors on which to fit a cubic spline.
 #' @param nout number of points to interpolate out
@@ -18,16 +18,16 @@ interp_spline <- function(x, y, nout = length(y)) {
   runlen <- rle(x)
   reps <- which(runlen$lengths != 1)
   if(length(reps) > 0){
-    runpos <- cumsum(runlen$lengths) - runlen$lengths + 1
-
-    for(i in reps){
-      run_inds <- runpos[i]:(runpos[i]+runlen$lengths[i] - 1)
-      y[runpos[i]] <- mean(y[run_inds])
-      x[run_inds[-1]] <- NA
-      y[run_inds[-1]] <- NA
-    }
-    x <- na.omit(x)
-    y <- na.omit(y)
+    #runpos <- cumsum(runlen$lengths) - runlen$lengths + 1
+    return(approx(x, y, n = nout)$y)
+    #for(i in reps){
+    #  run_inds <- runpos[i]:(runpos[i]+runlen$lengths[i] - 1)
+    #  y[runpos[i]] <- mean(y[run_inds])
+    #  x[run_inds[-1]] <- NA
+    #  y[run_inds[-1]] <- NA
+    #}
+    #x <- na.omit(x)
+    #y <- na.omit(y)
   }
   return(spline(x, y, n = nout)$y)
 }

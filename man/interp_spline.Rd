@@ -15,5 +15,5 @@ interp_spline(x, y, nout = length(y))
 Interpolates out equally spaced values by fitting a cubic spline on given points and
 matching the endpoints. Often used to redefine a curve with warped time axis on an
 even time basis. Note that quality of interpolation decreases with inadequate density
-of defining points.
+of defining points. If ties are found, linear interpolation is used.
 }
