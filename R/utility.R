@@ -18,16 +18,15 @@ interp_spline <- function(x, y, nout = length(y)) {
   runlen <- rle(x)
   reps <- which(runlen$lengths != 1)
   if(length(reps) > 0){
-    #runpos <- cumsum(runlen$lengths) - runlen$lengths + 1
-    return(approx(x, y, n = nout)$y)
-    #for(i in reps){
-    #  run_inds <- runpos[i]:(runpos[i]+runlen$lengths[i] - 1)
-    #  y[runpos[i]] <- mean(y[run_inds])
-    #  x[run_inds[-1]] <- NA
-    #  y[run_inds[-1]] <- NA
-    #}
-    #x <- na.omit(x)
-    #y <- na.omit(y)
+    runpos <- cumsum(runlen$lengths) - runlen$lengths + 1
+    ###return(approx(x, y, n = nout)$y)
+    run_inds <- numeric()
+    for(i in reps){
+      run_inds <- c(run_inds, (runpos[i]-2):(runpos[i]+runlen$lengths[i] - 1 + 2))
+
+    }
+    x <- x[-run_inds]
+    y <- y[-run_inds]
   }
   return(spline(x, y, n = nout)$y)
 }
