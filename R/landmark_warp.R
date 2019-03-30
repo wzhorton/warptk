@@ -94,5 +94,5 @@ landmark_warp <- function(y_list, feat_list, template_feats, niter = 1000, nburn
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
-  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post))
+  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post, wtime_post = wtime))
 }

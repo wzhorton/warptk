@@ -207,6 +207,6 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   mean_post <- as.numeric(Hp %*% beta_post)
 
   if(debug == TRUE) browser()
-  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post, accepts = accepts))
+  return(list(y_post = y_post, y_reg = y_reg, mean_post = mean_post, accepts = accepts, wtime_post = wtime_post))
 }
 
