@@ -22,7 +22,7 @@
 template_gp_warp <- function(y_list, feat_list, template_feats,
                              niter = 1000, nburn = 1000, int_p = 20,
                              asig = .1, bsig = .1, at = .1, bt = .1, al = .1, bl = .1,
-                             aa = 1, ba = 30, tune = 2, progress = TRUE, debug = FALSE){
+                             aa = 1, ba = 30, be = 2,tune = 2, progress = TRUE, debug = FALSE){
 
   #----- Fixed Values -----#
 
@@ -68,8 +68,11 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   alpha_save <- numeric(nrun)
   alpha_save[1] <- (aa + ba)/2
 
-  wtime <- lapply(1:n, function(i) time)
-  wtime_save <- lapply(1:n, function(i){
+  eta2_save <- matrix(NA, nrow = nrun, ncol = n)
+  eta2_save[1,] <- be/2
+
+  wtime <- otime <- lapply(1:n, function(i) time)
+  wtime_save <- otime_save <- lapply(1:n, function(i){
     out <- matrix(NA, nrow = nrun, ncol = m)
     out[1,] <- time
     return(out)
@@ -92,7 +95,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       setTxtProgressBar(bar, it)
     }
 
-    #-- Update alpha, M, wtime --#
+    #-- Update alpha, M, otime, wtime --#
     #for(i in 1:n){
     #  current_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
     #                         prec = 1 / lam2_save[it - 1] * Minv_list[[i]], log = TRUE, unnorm = FALSE), silent = TRUE)
@@ -113,7 +116,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     cand_lprior <- dunif(cand_alpha, min = aa, max = ba, log = TRUE)
     if(cand_lprior == -Inf){
       alpha_save[it] <- alpha_save[it - 1]
-      #wtime_save[[i]][it,] <- wtime[[i]]
+      #otime_save[[i]][it,] <- otime[[i]]
       #next
     } else{
       #  cand_M <- create_M(x_pts = feat_list[[i]], alpha = cand_alpha)
@@ -122,7 +125,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
       cand_Minv_list <- try(lapply(1:n, function(i) chol2inv(chol(cand_M_list[[i]]))), silent = TRUE)
       if(class(cand_Minv_list) == "try-error"){
         alpha_save[it] <- alpha_save[it - 1]
-        #wtime_save[[i]][it,] <- wtime[[i]]
+        #otime_save[[i]][it,] <- otime[[i]]
         #next
       } else{
         #  cand_llik <- try(dmnorm(y = template_feats, mu = feat_list[[i]],
@@ -140,18 +143,18 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
         }
 
         lratio <- cand_llik + cand_lprior - current_llik - current_lprior
-        #wtime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
+        #otime_tmp <- as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = cand_alpha) %*%
         #                          cand_Minv%*%(template_feats - feat_list[[i]]))
-        if(log(runif(1)) < lratio){ #&& is_monotone(wtime_tmp, strict = TRUE)){
+        if(log(runif(1)) < lratio){ #&& is_monotone(otime_tmp, strict = TRUE)){
           accepts <- accepts + 1
           alpha_save[it] <- cand_alpha
           M_list <- cand_M_list
           Minv_list <- cand_Minv_list
-          #wtime_save[[i]][it,] <- wtime[[i]] <- wtime_tmp
+          #otime_save[[i]][it,] <- otime[[i]] <- otime_tmp
         }
         else{
           alpha_save[it] <- alpha_save[it - 1]
-          #wtime_save[[i]][it,] <- wtime[[i]]
+          #otime_save[[i]][it,] <- otime[[i]]
         }
         #}
       }
@@ -164,12 +167,30 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
     lam2_save[it] <- update_normal_invgamma(y = rep(template_feats, n), a = al, b = bl,
                                             mu = stack(feat_list)$stack, R_inv = Matrix::bdiag(Minv_list))
 
-    #-- Update wtime
+    #-- Update otime
     for(i in 1:n){
-      wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[it]) %*%
+      otime[[i]] <- otime_save[[i]][it,] <- monotonize(as.numeric(time + create_M(x_pts = time, y_pts = feat_list[[i]], alpha = alpha_save[it]) %*%
                                                                     Minv_list[[i]]%*%(template_feats - feat_list[[i]])), forced = feat_inds[[i]])
       #chol2inv(chol(create_M(feat_list[[i]], alpha = alpha_save[[i]][it])))%*%(template_feats - feat_list[[i]]))
     }
+
+    #-- Update wtime, eta2
+    for(i in 1:n){
+      curll <- sum(dnorm(wtime[[i]], otime[[i]], eta2_save[it-1,i],log = TRUE))
+      curlp <- dunif(eta2_save[it-1,i],0,be,log = TRUE)
+      cand_eta2 <- abs(runif(1,-be/10,be/10) + eta2_save[it-1,i])
+      candlp <- dunif(cand_eta2,0,be, log = TRUE)
+      candll <- sum(dnorm(wtime[[i]], otime[[i]], cand_eta2,log = TRUE))
+      lrat <- candll + candlp - curll - curlp
+      if(lrat > log(runif(1))){
+        eta2_save[it,i] <- cand_eta2
+      } else {
+        eta2_save[it,i] <- eta2_save[it-1,i]
+      }
+      #eta2_save[it,i] <- 0.5#####also change default
+      wtime[[i]] <- wtime_save[[i]][it,] <- monotonize(otime[[i]] + c(0,rnorm(m-2, 0, eta2_save[it,i]),0), forced = c(1,m))
+    }
+
 
     #-- Update H_stack --#
     for(i in 1:n){
@@ -197,6 +218,7 @@ template_gp_warp <- function(y_list, feat_list, template_feats,
   wtime_post <- lapply(wtime_save, function(w) apply(w[-c(1:nburn),], 2, mean))
   Hlist_post <- lapply(wtime_post, function(w) cbs(w, int_p))
   beta_post <- apply(beta_save[-c(1:nburn),], 2, mean)
+  eta2_post <- apply(eta2_save[-c(1:nburn),], 2, mean)
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])
   lam2_post <- lapply(lam2_save, function(lvec) mean(lvec[-c(1:nburn)]))
