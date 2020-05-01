@@ -1,58 +1,37 @@
 #### utility.R ####
 
 
-#' Spline Curve Interpolation
+#' Evenly Spaced Curve Interpolation using Splines
 #'
-#' Interpolates out equally spaced values by fitting a cubic spline on given points and
-#' matching the endpoints. Often used to redefine a curve with warped time axis on an
-#' even time basis. Note that quality of interpolation decreases with inadequate density
-#' of defining points. If ties are found, linear interpolation is used.
+#' Interpolates curve values using cubic interpolation splines.
+#' The resulting evaluations correspond to an evenly spaced grid of input points.
+#' Often used to time-normalize registered curves onto a common time domain.
+#' Note the quality of interpolation decreases with inadequate density of defining points.
+#' If ties are found among input times, linear interpolation is used instead of splines.
 #'
-#' @param x,y coordinate vectors on which to fit a cubic spline.
-#' @param nout number of points to interpolate out
-#' @importFrom splines bs
+#' @param y numeric vector giving curve values
+#' @param x numeric vector giving input times. Defaults to evenly spaced values
+#' @param nout number of points defining resultant interpolated curve. Defaults to length of y
 #' @export
 
-interp_spline <- function(x, y, nout = length(y)) {
-  nout <- force(nout)
-  runlen <- rle(x)
-  reps <- which(runlen$lengths != 1)
-  if(length(reps) > 0){
-    runpos <- cumsum(runlen$lengths) - runlen$lengths + 1
-    ###return(approx(x, y, n = nout)$y)
-    run_inds <- numeric()
-    for(i in reps){
-      run_inds <- c(run_inds, (runpos[i]-2):(runpos[i]+runlen$lengths[i] - 1 + 2))
+interp_spline <- function(y, x = NULL, nout = NULL) {
+  if(is.null(nout))
+    nout <- length(y)
+  if(is.null(x))
+    x <- seq(0,1,len = length(y))
 
-    }
-    x <- x[-run_inds]
-    y <- y[-run_inds]
-  }
+  if(anyDuplicated(x))
+    return(approx(x, y, n = nout)$y)
+
   return(spline(x, y, n = nout)$y)
-}
-
-
-#' Second Order Penalty Matrix
-#'
-#' Creates a second order penalty matrix used in fitting penalized b-splines.
-#' Courtesy of CITATION NEEDED. Note that this function produces singular matrices.
-#'
-#' @param dim dimension of output matrix. Must be at least four.
-#' @export
-
-K2 <- function(dim) {
-  tmp <- list(c(-2, rep(-4, dim - 3), -2), rep(1, dim))
-  K <- Matrix::bandSparse(dim, k = -c(1:2), diag = tmp, symmetric = TRUE)
-  diag(K) <- c(1, 5, rep(6, dim - 4), 5, 1)
-  K <- matrix(as.numeric(K), nrow = dim, byrow = TRUE)
-  K
 }
 
 
 #' First Order Penalty Matrix
 #'
-#' Creates a first order penalty matrix used in fitting penalized b-splines.
-#' Courtesy of CITATION NEEDED. Note that this function produces singular matrices.
+#' Generates a first order penalty matrix discussed by Lang and Brezger (2012).
+#' In short, when used as a prior precision matrix for B-splines, this matrix imposes
+#' a roughness penalty. Note that this matrix is not full rank.
 #'
 #' @param dim dimension of output matrix. Must be at least three.
 #' @export

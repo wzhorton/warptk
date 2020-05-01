@@ -2,18 +2,21 @@
 % Please edit documentation in R/utility.R
 \name{interp_spline}
 \alias{interp_spline}
-\title{Spline Curve Interpolation}
+\title{Evenly Spaced Curve Interpolation using Splines}
 \usage{
-interp_spline(x, y, nout = length(y))
+interp_spline(y, x = NULL, nout = NULL)
 }
 \arguments{
-\item{x, y}{coordinate vectors on which to fit a cubic spline.}
+\item{y}{numeric vector giving curve values}
 
-\item{nout}{number of points to interpolate out}
+\item{x}{numeric vector giving input times. Defaults to evenly spaced values}
+
+\item{nout}{number of points defining resultant interpolated curve. Defaults to length of y}
 }
 \description{
-Interpolates out equally spaced values by fitting a cubic spline on given points and
-matching the endpoints. Often used to redefine a curve with warped time axis on an
-even time basis. Note that quality of interpolation decreases with inadequate density
-of defining points. If ties are found, linear interpolation is used.
+Interpolates curve values using cubic interpolation splines.
+The resulting evaluations correspond to an evenly spaced grid of input points.
+Often used to time-normalize registered curves onto a common time domain.
+Note the quality of interpolation decreases with inadequate density of defining points.
+If ties are found among input times, linear interpolation is used instead of splines.
 }
