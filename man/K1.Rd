@@ -10,6 +10,7 @@ K1(dim)
 \item{dim}{dimension of output matrix. Must be at least three.}
 }
 \description{
-Creates a first order penalty matrix used in fitting penalized b-splines.
-Courtesy of CITATION NEEDED. Note that this function produces singular matrices.
+Generates a first order penalty matrix discussed by Lang and Brezger (2012).
+In short, when used as a prior precision matrix for B-splines, this matrix imposes
+a roughness penalty. Note that this matrix is not full rank.
 }
