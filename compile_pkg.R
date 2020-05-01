@@ -9,6 +9,7 @@ library(devtools)
 rm(list = ls()) # cleans current environment
 gc() # releases memory removed above
 
+# pkgbuild::compile_dll() #run if DLL error occurs or if new C functions don't appear
 # create NAMESPACE and .Rd files for documentation. Compile C files if any.
 devtools::document()
 
