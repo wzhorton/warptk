@@ -9,7 +9,11 @@
     .Call('_warptk_bs_even', PACKAGE = 'warptk', time, nk)
 }
 
-.two_step_warp_C <- function(ymat, wtime, P, niter, nburn, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau) {
-    .Call('_warptk_two_step_warp', PACKAGE = 'warptk', ymat, wtime, P, niter, nburn, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau)
+.two_step_warp_C <- function(ymat, wtime, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau) {
+    .Call('_warptk_two_step_warp', PACKAGE = 'warptk', ymat, wtime, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau)
+}
+
+.bhcr_warp_C <- function(ymat, time, P, Q, U, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam) {
+    .Call('_warptk_bhcr_warp', PACKAGE = 'warptk', ymat, time, P, Q, U, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam)
 }
 

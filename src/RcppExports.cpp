@@ -30,8 +30,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // two_step_warp
-List two_step_warp(arma::mat ymat, arma::mat wtime, arma::mat P, int niter, int nburn, double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c, double a_tau, double b_tau);
-RcppExport SEXP _warptk_two_step_warp(SEXP ymatSEXP, SEXP wtimeSEXP, SEXP PSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP a_aSEXP, SEXP b_aSEXP, SEXP a_cSEXP, SEXP b_cSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP) {
+List two_step_warp(arma::mat ymat, arma::mat wtime, arma::mat P, int niter, int nburn, int nthin, double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c, double a_tau, double b_tau);
+RcppExport SEXP _warptk_two_step_warp(SEXP ymatSEXP, SEXP wtimeSEXP, SEXP PSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP a_aSEXP, SEXP b_aSEXP, SEXP a_cSEXP, SEXP b_cSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,6 +40,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type P(PSEXP);
     Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
     Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
+    Rcpp::traits::input_parameter< int >::type nthin(nthinSEXP);
     Rcpp::traits::input_parameter< double >::type a_eps(a_epsSEXP);
     Rcpp::traits::input_parameter< double >::type b_eps(b_epsSEXP);
     Rcpp::traits::input_parameter< double >::type a_a(a_aSEXP);
@@ -48,7 +49,35 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type b_c(b_cSEXP);
     Rcpp::traits::input_parameter< double >::type a_tau(a_tauSEXP);
     Rcpp::traits::input_parameter< double >::type b_tau(b_tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(two_step_warp(ymat, wtime, P, niter, nburn, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau));
+    rcpp_result_gen = Rcpp::wrap(two_step_warp(ymat, wtime, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau));
+    return rcpp_result_gen;
+END_RCPP
+}
+// bhcr_warp
+List bhcr_warp(arma::mat ymat, arma::vec time, arma::mat P, arma::mat Q, arma::vec U, int niter, int nburn, int nthin, double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c, double a_tau, double b_tau, double a_lam, double b_lam);
+RcppExport SEXP _warptk_bhcr_warp(SEXP ymatSEXP, SEXP timeSEXP, SEXP PSEXP, SEXP QSEXP, SEXP USEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP a_aSEXP, SEXP b_aSEXP, SEXP a_cSEXP, SEXP b_cSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP a_lamSEXP, SEXP b_lamSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type ymat(ymatSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type P(PSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type U(USEXP);
+    Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
+    Rcpp::traits::input_parameter< int >::type nburn(nburnSEXP);
+    Rcpp::traits::input_parameter< int >::type nthin(nthinSEXP);
+    Rcpp::traits::input_parameter< double >::type a_eps(a_epsSEXP);
+    Rcpp::traits::input_parameter< double >::type b_eps(b_epsSEXP);
+    Rcpp::traits::input_parameter< double >::type a_a(a_aSEXP);
+    Rcpp::traits::input_parameter< double >::type b_a(b_aSEXP);
+    Rcpp::traits::input_parameter< double >::type a_c(a_cSEXP);
+    Rcpp::traits::input_parameter< double >::type b_c(b_cSEXP);
+    Rcpp::traits::input_parameter< double >::type a_tau(a_tauSEXP);
+    Rcpp::traits::input_parameter< double >::type b_tau(b_tauSEXP);
+    Rcpp::traits::input_parameter< double >::type a_lam(a_lamSEXP);
+    Rcpp::traits::input_parameter< double >::type b_lam(b_lamSEXP);
+    rcpp_result_gen = Rcpp::wrap(bhcr_warp(ymat, time, P, Q, U, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -56,7 +85,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_warptk_dmat", (DL_FUNC) &_warptk_dmat, 1},
     {"_warptk_bs_even", (DL_FUNC) &_warptk_bs_even, 2},
-    {"_warptk_two_step_warp", (DL_FUNC) &_warptk_two_step_warp, 13},
+    {"_warptk_two_step_warp", (DL_FUNC) &_warptk_two_step_warp, 14},
+    {"_warptk_bhcr_warp", (DL_FUNC) &_warptk_bhcr_warp, 18},
     {NULL, NULL, 0}
 };
 

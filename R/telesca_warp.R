@@ -35,12 +35,12 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
 
   q <-  int_q + r
   knot_loc_q <- seq(time[1], time[m], len = int_q+2)[-c(1,int_q+2)]
-  #Hq <- bs(time, knots = knot_loc_q, intercept = T)
-  Hq <- cbs(time, int_q)
+  Hq <- bs(time, knots = knot_loc_q, intercept = T)
+  #Hq <- cbs(time, int_q)
   p <- int_p + r
   knot_loc_p <- seq(time[1], time[m], len = int_p+2)[-c(1,int_p+2)]
-  #Hp <- bs(time, knots = knot_loc_p, intercept = T)
-  Hp <- cbs(time,int_p)
+  Hp <- bs(time, knots = knot_loc_p, intercept = T)
+  #Hp <- cbs(time,int_p)
 
   nu <- c(rep(time[1],r),knot_loc_q,rep(time[m],r))
   Upsilon <- (nu[r] - nu[1])/(r-1)
@@ -105,8 +105,8 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
       for(j in 2:(q-1)){
         tmp_phi[j] <- runif(1, min = max(tmp_phi[j] - tune, tmp_phi[j-1]),
                             max = min(tmp_phi[j] + tune, tmp_phi[j+1]))
-        #tmp_Hp <- bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE)
-        tmp_Hp <- cbs(Hq %*% tmp_phi, int_p)
+        tmp_Hp <- bs(Hq %*% tmp_phi, knots = knot_loc_p, intercept = TRUE)
+        #tmp_Hp <- cbs(Hq %*% tmp_phi, int_p)
         cand_llik <- dmnorm(y = y_list[[i]], mu =  tmp_Hp %*% beta_save[it - 1,],
                             prec = 1 / sig2_save[it - 1] * diag_m, log = TRUE, unnorm = TRUE)
         cand_lprior <- dmnorm(y = tmp_phi, mu = Upsilon,
@@ -132,8 +132,8 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
     }
 
     #-- Update H_list --#
-    #H_list <- lapply(1:n, function(i) bs(wtime[[i]], knots = knot_loc_p, intercept = TRUE))
-    H_list <- lapply(1:n, function(i) cbs(wtime[[i]], int_p))
+    H_list <- lapply(1:n, function(i) bs(wtime[[i]], knots = knot_loc_p, intercept = TRUE))
+    #H_list <- lapply(1:n, function(i) cbs(wtime[[i]], int_p))
 
     #-- Update H_stack --#
     H_stack <- stack_Matrix(H_list)
@@ -161,7 +161,9 @@ telesca_warp <- function(y_list, niter = 1000, nburn = 1000, int_q = 5, int_p = 
   close(bar)
   accepts <- accepts / nrun
   wtime_post <- lapply(wtime_save, function(w) apply(w[-c(1:nburn),], 2, mean))
-  Hlist_post <- lapply(wtime_post, function(w) cbs(w, int_p))
+  #Hlist_post <- lapply(wtime_post, function(w) cbs(w, int_p))
+  Hlist_post <- lapply(wtime_post, function(w)  bs(w, knots = knot_loc_p, intercept = T))
+
   beta_post <- apply(beta_save[-c(1:nburn),], 2, mean)
   sig2_post <- mean(sig2_save[-c(1:nburn)])
   tau2_post <- mean(tau2_save[-c(1:nburn)])
