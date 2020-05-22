@@ -15,7 +15,7 @@ warp_landmark <- function(y, lmk_indx, ref_lmk, p=10, n_iter=10000, n_burn=15000
   wtime <- sapply(1:ncol(y), function(i) approx(x = c(0, time[lmk_indx[,i]], 1),
                                           y = c(0, ref_lmk, 1), xout = time)$y)
   mcmc_list <- .two_step_warp_C(y, wtime, P, n_iter, n_burn, n_thin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau)
-  names(mcmc_list) <- c("a", "c", "beta", "sig2e", "sig2a", "sig2c", "tau2", "mu")
+  names(mcmc_list) <- c("a", "c", "beta", "sig2e", "sig2a", "sig2c", "tau2", "wtime", "mu")
   return(mcmc_list)
 }
 

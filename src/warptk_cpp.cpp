@@ -287,7 +287,7 @@ List two_step_warp(arma::mat ymat, arma::mat wtime, arma::mat P, int niter, int 
     }
   }
 
-  List chains = List::create(a_chain, c_chain, beta_chain, sig2e_chain, sig2a_chain, sig2c_chain, tau2_chain, mu_chain);
+  List chains = List::create(a_chain, c_chain, beta_chain, sig2e_chain, sig2a_chain, sig2c_chain, tau2_chain, wtime, mu_chain);
   return chains;
 }
 
