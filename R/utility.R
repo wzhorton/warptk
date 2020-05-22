@@ -42,3 +42,23 @@ K1 <- function(dim){
   K <- matrix(as.numeric(K),nrow=dim, byrow=TRUE)
   K
 }
+
+#' Register Curves Given Warping Functions
+#'
+#' Computes registered curves from either given time warping vectors or an
+#' MCMC array of time warping vectors though the inverse warping function.
+#'
+#' @param y numeric matrix; columnns should correspond to observed time normalized curves
+#' @param wtime numeric matrix or three dimensional array; columns should correspond to warping function realizations and MCMC iterates should correspond to the third array dimension (if applicable).
+#' @export
+
+register <- function(y, wtime){
+  if(!is.na(dim(wtime)[3])){
+    wtime <- as.matrix(apply(wtime,3,mean))
+  }
+  sapply(1:ncol(y), function(i){
+    interp_spline(wtime[,i], y[,i])
+  })
+}
+
+

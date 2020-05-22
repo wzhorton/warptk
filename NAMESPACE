@@ -3,6 +3,7 @@
 export(K1)
 export(interp_spline)
 export(landmark_warp)
+export(register)
 export(telesca_warp)
 export(template_gp_warp)
 export(warp_bhcr)
