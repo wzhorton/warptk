@@ -4,7 +4,7 @@
 \alias{warp_landmark}
 \title{Bayesian Landmark Warping}
 \usage{
-warp_landmark(y, lmk_indx, ref_lmk_indx, p = 15, n_iter = 10000,
+warp_landmark(y, lmk_indx, ref_lmk, p = 10, n_iter = 10000,
   n_burn = 5000, n_thin = 1, a_eps = 0.1, b_eps = 0.1, a_a = 0.1,
   b_a = 0.1, a_c = 0.1, b_c = 0.1, a_tau = 0.1, b_tau = 0.1)
 }
