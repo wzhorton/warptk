@@ -1,8 +1,8 @@
 Package: warptk
 Type: Package
 Title: Warping Toolkit
-Version: 0.4.1
-Date: 2020-04-30
+Version: 0.4.2
+Date: 2020-05-21
 Author: W. Zachary Horton
 Maintainer: Same <example@email.com>
 Description: Warping Toolkit implements select Bayesian methods of time warping, or curve registration, for one-dimensional functional data. 
