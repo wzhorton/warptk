@@ -4,7 +4,7 @@
 \alias{warp_bhcr}
 \title{Bayesian Hierarchical Curve Registration}
 \usage{
-warp_bhcr(y, p = 10, q = 5, n_iter = 15000, n_burn = 50000,
+warp_bhcr(y, p = 10, q = 5, n_iter = 15000, n_burn = 10000,
   n_thin = 1, a_eps = 0.1, b_eps = 0.1, a_a = 0.1, b_a = 0.1,
   a_c = 0.1, b_c = 0.1, a_tau = 0.1, b_tau = 0.1, a_lam = 0.1,
   b_lam = 0.1)

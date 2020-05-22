@@ -343,6 +343,7 @@ List bhcr_warp(arma::mat ymat, arma::vec time, arma::mat P, arma::mat Q, arma::v
 
 
   arma::mat wtime(m,n);
+  arma::cube wtime_chain(m,n,niter/nthin);
   for(int i=0; i<n;i++){
     wtime.col(i) = time;
   }
@@ -463,6 +464,7 @@ List bhcr_warp(arma::mat ymat, arma::vec time, arma::mat P, arma::mat Q, arma::v
       lam2_chain(save_index) = lam2;
       beta_chain.col(save_index) = beta;
       mu_chain.slice(save_index) = mu;
+      wtime_chain.slice(save_index) = wtime;
       phi_chain.slice(save_index) = phi;
       a_chain.col(save_index) = a;
       c_chain.col(save_index) = c;
@@ -470,7 +472,7 @@ List bhcr_warp(arma::mat ymat, arma::vec time, arma::mat P, arma::mat Q, arma::v
     }
   }
 
-  List chains = List::create(a_chain, c_chain, beta_chain, sig2e_chain, sig2a_chain, sig2c_chain, tau2_chain, lam2_chain, phi_chain, mu_chain);
+  List chains = List::create(a_chain, c_chain, beta_chain, sig2e_chain, sig2a_chain, sig2c_chain, tau2_chain, lam2_chain, phi_chain, wtime_chain, mu_chain);
   return chains;
 }
 
