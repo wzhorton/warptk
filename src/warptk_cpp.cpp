@@ -31,7 +31,7 @@ arma::vec qformI(arma::mat y, arma::vec mu){
   return sum(y_shift % y_shift, 1);
 }
 
-arma::vec rep4k(arma::vec &u){
+arma::vec rep4k(arma::vec u){
   int n = u.n_elem;
   double tmp3;
   double ui;
@@ -50,7 +50,7 @@ arma::vec rep4k(arma::vec &u){
   return out;
 }
 
-arma::vec rep3k(arma::vec &u){
+arma::vec rep3k(arma::vec u){
   int n = u.n_elem;
   double ui;
   arma::vec out(n);
@@ -69,7 +69,7 @@ arma::vec rep3k(arma::vec &u){
   return out;
 }
 
-arma::vec rep2k(arma::vec &u){
+arma::vec rep2k(arma::vec u){
   int n = u.n_elem;
   double ui;
   arma::vec out(n);
@@ -169,6 +169,15 @@ arma::mat dist(arma::vec x, arma::vec y){
     dists.col(i) = abs(x - y(i));
   }
   return dists;
+}
+
+bool is_increasing(arma::vec x){
+  for(int i = 1; i < x.n_elem; i++){
+    if(x(i) <= x(i-1)){
+      return false;
+    }
+  }
+  return true;
 }
 
 // ##############################################################
@@ -483,7 +492,7 @@ List bhcr_warp(arma::mat ymat, arma::vec time, arma::mat P, arma::mat Q, arma::v
 
 
 // [[Rcpp::export(".template_warp_C")]]
-List template_warp(arma::mat ymat, arma::vec time, arma::mat lmk_time, arma::vec ref_time, arma::mat P,
+List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::mat lmk_time, arma::vec ref_time, arma::mat P,
                    int niter, int nburn, int nthin,
                    double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c,
                    double a_tau, double b_tau, double a_lam, double b_lam){
@@ -562,11 +571,11 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat lmk_time, arma::vec
     M_feat_gen.slice(i)(l-1,l-1) = 1;
   }
 
-  arma::mat wtime(m,n);
+  arma::mat wtime = wtime_init;
   arma::cube wtime_chain(m,n,niter/nthin);
-  for(int i=0; i<n;i++){
+  /*for(int i=0; i<n;i++){
     wtime.col(i) = time + M_timefeat_gen.slice(i)*solve(M_feat_gen.slice(i), ref_time - lmk_time.col(i));
-  }
+  }*/
 
   arma::cube H(m,p,n);
   for(int i=0; i<n; i++){
@@ -633,11 +642,10 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat lmk_time, arma::vec
     // Update Step
     lam2 = 1/rgamma(1, a_lam + m*n/2, 1/(b_lam + 0.5*ssq_lam2))(0);
 
-
     ////////// Update Alpha, Eta //////////
 
     //Update Step
-    log_det(ldet_val, ldet_sign, lam2*M_time);
+    log_det(ldet_val, ldet_sign, lam2*M_time); //return List::create(save_index);
     curr_lpost_ae = -0.5*n*ldet_val - 0.5/lam2*ssq_lam2;
     cand_ae = abs(rmnorm(ae, tune_ae, false)); //clean up conditioning, why are negatives getting in
     //cand_ae(0) = rnorm(1, alpha, tune_ae(0,0))(0);
@@ -691,7 +699,7 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat lmk_time, arma::vec
       cand_ssq_wtime(i) = qform(cand_wtime, time, M_time_inv, true)(0);
       cand_lpost_wtime = -.5/sig2_eps*dot(ymat.col(i)-cand_mu, ymat.col(i)-cand_mu) - .5/lam2*cand_ssq_wtime(i);
       //Rcpp::Rcout << "cand-curr: " << cand_lpost_wtime-curr_lpost_wtime <<std::endl;
-      if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
+      if(is_increasing(cand_wtime) && log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
         // Primary Updates
         wtime.col(i) = cand_wtime;
         H.slice(i) = candH;

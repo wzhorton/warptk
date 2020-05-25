@@ -95,13 +95,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // template_warp
-List template_warp(arma::mat ymat, arma::vec time, arma::mat lmk_time, arma::vec ref_time, arma::mat P, int niter, int nburn, int nthin, double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c, double a_tau, double b_tau, double a_lam, double b_lam);
-RcppExport SEXP _warptk_template_warp(SEXP ymatSEXP, SEXP timeSEXP, SEXP lmk_timeSEXP, SEXP ref_timeSEXP, SEXP PSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP a_aSEXP, SEXP b_aSEXP, SEXP a_cSEXP, SEXP b_cSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP a_lamSEXP, SEXP b_lamSEXP) {
+List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::mat lmk_time, arma::vec ref_time, arma::mat P, int niter, int nburn, int nthin, double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c, double a_tau, double b_tau, double a_lam, double b_lam);
+RcppExport SEXP _warptk_template_warp(SEXP ymatSEXP, SEXP timeSEXP, SEXP wtime_initSEXP, SEXP lmk_timeSEXP, SEXP ref_timeSEXP, SEXP PSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP a_aSEXP, SEXP b_aSEXP, SEXP a_cSEXP, SEXP b_cSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP a_lamSEXP, SEXP b_lamSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type ymat(ymatSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type wtime_init(wtime_initSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type lmk_time(lmk_timeSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type ref_time(ref_timeSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type P(PSEXP);
@@ -118,7 +119,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type b_tau(b_tauSEXP);
     Rcpp::traits::input_parameter< double >::type a_lam(a_lamSEXP);
     Rcpp::traits::input_parameter< double >::type b_lam(b_lamSEXP);
-    rcpp_result_gen = Rcpp::wrap(template_warp(ymat, time, lmk_time, ref_time, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam));
+    rcpp_result_gen = Rcpp::wrap(template_warp(ymat, time, wtime_init, lmk_time, ref_time, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -129,7 +130,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_warptk_dist", (DL_FUNC) &_warptk_dist, 2},
     {"_warptk_two_step_warp", (DL_FUNC) &_warptk_two_step_warp, 14},
     {"_warptk_bhcr_warp", (DL_FUNC) &_warptk_bhcr_warp, 18},
-    {"_warptk_template_warp", (DL_FUNC) &_warptk_template_warp, 18},
+    {"_warptk_template_warp", (DL_FUNC) &_warptk_template_warp, 19},
     {NULL, NULL, 0}
 };
 

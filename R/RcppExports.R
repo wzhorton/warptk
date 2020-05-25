@@ -21,7 +21,7 @@
     .Call('_warptk_bhcr_warp', PACKAGE = 'warptk', ymat, time, P, Q, U, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam)
 }
 
-.template_warp_C <- function(ymat, time, lmk_time, ref_time, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam) {
-    .Call('_warptk_template_warp', PACKAGE = 'warptk', ymat, time, lmk_time, ref_time, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam)
+.template_warp_C <- function(ymat, time, wtime_init, lmk_time, ref_time, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam) {
+    .Call('_warptk_template_warp', PACKAGE = 'warptk', ymat, time, wtime_init, lmk_time, ref_time, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam)
 }
 
