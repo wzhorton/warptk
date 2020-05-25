@@ -1,5 +1,5 @@
 #### landmark_warp.R ####
-
+# This is Garritt making adjustments
 #' Landmark Warping
 #'
 #' Warps a list of curves by matching landmarks to provided template landmarks.
