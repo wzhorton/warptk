@@ -54,10 +54,10 @@ K1 <- function(dim){
 
 register <- function(y, wtime){
   if(!is.na(dim(wtime)[3])){
-    wtime <- as.matrix(apply(wtime,3,mean))
+    wtime <- as.matrix(apply(wtime,c(1,2),mean))
   }
   sapply(1:ncol(y), function(i){
-    interp_spline(wtime[,i], y[,i])
+    interp_spline(y[,i], wtime[,i])
   })
 }
 
