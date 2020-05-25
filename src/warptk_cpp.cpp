@@ -699,7 +699,7 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
       cand_ssq_wtime(i) = qform(cand_wtime, time, M_time_inv, true)(0);
       cand_lpost_wtime = -.5/sig2_eps*dot(ymat.col(i)-cand_mu, ymat.col(i)-cand_mu) - .5/lam2*cand_ssq_wtime(i);
       //Rcpp::Rcout << "cand-curr: " << cand_lpost_wtime-curr_lpost_wtime <<std::endl;
-      if(is_increasing(cand_wtime) && log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
+      if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){ //is_increasing(cand_wtime) &&
         // Primary Updates
         wtime.col(i) = cand_wtime;
         H.slice(i) = candH;
