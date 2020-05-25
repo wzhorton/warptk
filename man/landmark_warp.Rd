@@ -4,9 +4,20 @@
 \alias{landmark_warp}
 \title{Landmark Warping}
 \usage{
-landmark_warp(y_list, feat_list, template_feats, niter = 1000,
-  nburn = 1000, int_p = 20, asig = 0.1, bsig = 0.1, at = 0.1,
-  bt = 0.1, progress = TRUE, debug = FALSE)
+landmark_warp(
+  y_list,
+  feat_list,
+  template_feats,
+  niter = 1000,
+  nburn = 1000,
+  int_p = 20,
+  asig = 0.1,
+  bsig = 0.1,
+  at = 0.1,
+  bt = 0.1,
+  progress = TRUE,
+  debug = FALSE
+)
 }
 \arguments{
 \item{y_list}{list of curves with equal length}

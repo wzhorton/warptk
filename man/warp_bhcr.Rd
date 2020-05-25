@@ -4,11 +4,25 @@
 \alias{warp_bhcr}
 \title{Bayesian Hierarchical Curve Registration}
 \usage{
-warp_bhcr(y, p = 10, q = 5, n_iter = 15000, n_burn = 10000,
-  n_thin = 1, a_eps = 0.1, b_eps = 0.1, a_a = 0.1, b_a = 0.1,
-  a_c = 0.1, b_c = 0.1, a_tau = 0.1, b_tau = 0.1, a_lam = 0.1,
-  b_lam = 0.1)
+warp_bhcr(
+  y,
+  p = 10,
+  q = 6,
+  n_iter = 15000,
+  n_burn = 10000,
+  n_thin = 1,
+  a_eps = 0.1,
+  b_eps = 0.1,
+  a_a = 0.1,
+  b_a = 0.1,
+  a_c = 0.1,
+  b_c = 0.1,
+  a_tau = 0.1,
+  b_tau = 0.1,
+  a_lam = 0.1,
+  b_lam = 0.1
+)
 }
 \description{
-Bayesian Hierarchical Curve Registration
+q must be at least 6 (the min is 5 in reality, but my fast fromula assumes at least 6)
 }
