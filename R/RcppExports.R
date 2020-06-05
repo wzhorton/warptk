@@ -13,6 +13,10 @@
     .Call('_warptk_dist', PACKAGE = 'warptk', x, y)
 }
 
+.monotonize_C <- function(x, y) {
+    invisible(.Call('_warptk_curve_monotonize', PACKAGE = 'warptk', x, y))
+}
+
 .two_step_warp_C <- function(ymat, wtime, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau) {
     .Call('_warptk_two_step_warp', PACKAGE = 'warptk', ymat, wtime, P, niter, nburn, nthin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau)
 }

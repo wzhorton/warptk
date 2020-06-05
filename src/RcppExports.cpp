@@ -42,6 +42,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// curve_monotonize
+void curve_monotonize(arma::vec x, arma::vec& y);
+RcppExport SEXP _warptk_curve_monotonize(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type y(ySEXP);
+    curve_monotonize(x, y);
+    return R_NilValue;
+END_RCPP
+}
 // two_step_warp
 List two_step_warp(arma::mat ymat, arma::mat wtime, arma::mat P, int niter, int nburn, int nthin, double a_eps, double b_eps, double a_a, double b_a, double a_c, double b_c, double a_tau, double b_tau);
 RcppExport SEXP _warptk_two_step_warp(SEXP ymatSEXP, SEXP wtimeSEXP, SEXP PSEXP, SEXP niterSEXP, SEXP nburnSEXP, SEXP nthinSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP a_aSEXP, SEXP b_aSEXP, SEXP a_cSEXP, SEXP b_cSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP) {
@@ -128,6 +139,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_warptk_bs_even", (DL_FUNC) &_warptk_bs_even, 2},
     {"_warptk_det_sympd", (DL_FUNC) &_warptk_det_sympd, 2},
     {"_warptk_dist", (DL_FUNC) &_warptk_dist, 2},
+    {"_warptk_curve_monotonize", (DL_FUNC) &_warptk_curve_monotonize, 2},
     {"_warptk_two_step_warp", (DL_FUNC) &_warptk_two_step_warp, 14},
     {"_warptk_bhcr_warp", (DL_FUNC) &_warptk_bhcr_warp, 18},
     {"_warptk_template_warp", (DL_FUNC) &_warptk_template_warp, 19},
