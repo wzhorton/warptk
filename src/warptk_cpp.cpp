@@ -733,11 +733,11 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
       //Rcpp::Rcout << "cand-curr: " << cand_lpost_wtime-curr_lpost_wtime <<std::endl;
       if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){ //is_increasing(cand_wtime) &&
         // Primary Updates
-        Rcpp::Rcout<<cand_wtime<<std::endl;
 
+        // Rcpp::Rcout<<cand_wtime<<std::endl;
         curve_monotonize(cand_wtime, mon_warp);
+        //Rcpp::Rcout<<mon_warp<<std::endl;
 
-        Rcpp::Rcout<<mon_warp<<std::endl;
         wtime.col(i) = mon_warp;
 //        H.slice(i) = candH;
         H.slice(i) = bs_even(mon_warp,p-2);
