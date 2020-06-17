@@ -6,7 +6,7 @@
 #' @exportPattern "^[[:alpha:]]+"
 #' @export
 #'
-warp_landmark <- function(y, lmk_inds, ref_lmk_inds, p=10, n_iter=10000, n_burn=15000, n_thin = 1,
+warp_landmark <- function(y, lmk_inds, ref_lmk_inds, p=10, n_iter=15000, n_burn=10000, n_thin = 1,
                           a_eps=.1, b_eps=.1, a_a =.1, b_a=.1,
                           a_c=.1, b_c=.1, a_tau=.1, b_tau=.1){
   time <- seq(0,1,len=nrow(y))
