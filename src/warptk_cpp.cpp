@@ -733,20 +733,26 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
       cand_ssq_wtime(i) = qform(cand_wtime, time, M_time_inv, true)(0);
       cand_lpost_wtime = -.5/sig2_eps*dot(ymat.col(i)-cand_mu, ymat.col(i)-cand_mu) - .5/lam2*cand_ssq_wtime(i);
       //Rcpp::Rcout << "cand-curr: " << cand_lpost_wtime-curr_lpost_wtime <<std::endl;
-      if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){ //is_increasing(cand_wtime) &&
-        // Primary Updates
 
-        // Rcpp::Rcout<<cand_wtime<<std::endl;
-        curve_monotonize(cand_wtime, mon_warp);
-        //Rcpp::Rcout<<mon_warp<<std::endl;
+      if(iter < nburn){
+        if(is_increasing(cand_wtime) && log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
+          // Primary Updates
+          wtime.col(i) = cand_wtime;
+          H.slice(i) = candH;
 
-        wtime.col(i) = mon_warp;
-//        H.slice(i) = candH;
-        H.slice(i) = bs_even(mon_warp,p-2);
-        // Peripheral Updates
-//        ssq_wtime(i) = cand_ssq_wtime(i);
-        ssq_wtime(i) = qform(mon_warp, time, M_time_inv, true)(0);
+          // Peripheral Updates
+          ssq_wtime(i) = cand_ssq_wtime(i);
+        }
+      } else {
+        if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
+          // Primary Updates
+          curve_monotonize(cand_wtime, mon_warp);
+          wtime.col(i) = mon_warp;
+          H.slice(i) = bs_even(mon_warp,p-2);
 
+          // Peripheral Updates
+          ssq_wtime(i) = qform(mon_warp, time, M_time_inv, true)(0);
+        }
       }
     }
     ssq_lam2 = sum(ssq_wtime);
