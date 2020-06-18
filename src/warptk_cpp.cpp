@@ -205,6 +205,7 @@ void curve_monotonize(arma::vec x, arma::vec &y){
           }
         } else {
           eloop = 0;
+        }
       }
     }
   }
