@@ -51,7 +51,7 @@ warp_template <- function(y, lmk_inds, ref_lmk_inds, p = 10,  n_iter=15000, n_bu
                       a_eps=.1, b_eps=.1, a_a =.1, b_a=.1, a_c = .1, b_c = .1,
                       a_tau=.1, b_tau=.1, a_lam = .1, b_lam = .1){
   time <- seq(0,1,len=nrow(y))
-  ref_lmk <- c(0, ref_lmk_inds/nrow(y), 1)
+  ref_lmk <- c(0, time[ref_lmk_inds], 1)
   feats <- apply(as.matrix(lmk_inds),2,function(cc) c(0,time[cc],1))
   P <- K1(p)
   P[1,1] <- 2
