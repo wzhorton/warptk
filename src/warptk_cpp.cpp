@@ -180,39 +180,6 @@ bool is_increasing(arma::vec x){
   return true;
 }
 
-// [[Rcpp::export(".monotonize_C")]]
-void curve_monotonize(arma::vec x, arma::vec &y){
-
-  int n = x.n_elem;
-  int i, ii, eloop;
-  double mn;
-  y = x;
-  for(i=0; i<(n-1); i++){
-    if(y(i) > y(i+1)){
-      mn = arma::mean(y.subvec(i, i+1));
-      y(i) = mn;
-      y(i+1) = mn;
-      ii = i;
-      eloop = 1;
-      while(eloop){
-        if(i > 0){
-          if(y(ii) < y(ii-1)){
-            y.subvec(ii-1, i+1).fill(arma::mean(y.subvec(ii-1, i+1)));
-            ii = ii - 1;
-            if(ii == 0) eloop = 0;
-          } else {
-            eloop = 0;
-          }
-        } else {
-          eloop = 0;
-        }
-      }
-    }
-  }
-}
-
-
-
 // ##############################################################
 // ##############################################################
 //              REGISTRATION FUNCTIONS
@@ -667,7 +634,6 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
   double ldet_val;
   double ldet_sign;
   arma::mat M_time_inv = arma::inv_sympd(M_time);
-  arma::vec mon_warp(n);
 
   for(int iter=0; iter<nrun; iter++){
 
@@ -733,26 +699,12 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
       cand_ssq_wtime(i) = qform(cand_wtime, time, M_time_inv, true)(0);
       cand_lpost_wtime = -.5/sig2_eps*dot(ymat.col(i)-cand_mu, ymat.col(i)-cand_mu) - .5/lam2*cand_ssq_wtime(i);
       //Rcpp::Rcout << "cand-curr: " << cand_lpost_wtime-curr_lpost_wtime <<std::endl;
-
-      if(iter < nburn){
-        if(is_increasing(cand_wtime) && log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
-          // Primary Updates
-          wtime.col(i) = cand_wtime;
-          H.slice(i) = candH;
-
-          // Peripheral Updates
-          ssq_wtime(i) = cand_ssq_wtime(i);
-        }
-      } else {
-        if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){
-          // Primary Updates
-          curve_monotonize(cand_wtime, mon_warp);
-          wtime.col(i) = mon_warp;
-          H.slice(i) = bs_even(mon_warp,p-2);
-
-          // Peripheral Updates
-          ssq_wtime(i) = qform(mon_warp, time, M_time_inv, true)(0);
-        }
+      if(log(runif(1)(0)) < cand_lpost_wtime - curr_lpost_wtime){ //is_increasing(cand_wtime) &&
+        // Primary Updates
+        wtime.col(i) = cand_wtime;
+        H.slice(i) = candH;
+        // Peripheral Updates
+        ssq_wtime(i) = cand_ssq_wtime(i);
       }
     }
     ssq_lam2 = sum(ssq_wtime);
