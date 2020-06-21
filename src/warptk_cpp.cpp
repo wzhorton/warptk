@@ -180,6 +180,10 @@ bool is_increasing(arma::vec x){
   return true;
 }
 
+double bound(double x, double mn, double mx){
+  return std::min(mx, std::max(x, mn));
+}
+
 // [[Rcpp::export(".monotonize_C")]]
 void curve_monotonize(arma::vec x, arma::vec &y){
 
@@ -208,6 +212,9 @@ void curve_monotonize(arma::vec x, arma::vec &y){
         }
       }
     }
+  }
+  for(i=0; i<(n-1); i++){
+    y(i) = bound(y(i), 0, 1);
   }
 }
 
