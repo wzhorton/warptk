@@ -51,12 +51,12 @@ warp_template <- function(y, lmk_inds, ref_lmk_inds, p = 10,  n_iter=15000, n_bu
                       a_eps=.1, b_eps=.1, a_a =.1, b_a=.1, a_c = .1, b_c = .1,
                       a_tau=.1, b_tau=.1, a_lam = .1, b_lam = .1){
   time <- seq(0,1,len=nrow(y))
-  ref_lmk <- c(0, ref_lmk_inds/nrow(y), 1)
+  ref_lmk <- c(0, time[ref_lmk_inds], 1)
   feats <- apply(as.matrix(lmk_inds),2,function(cc) c(0,time[cc],1))
   P <- K1(p)
   P[1,1] <- 2
   wtime_init <- sapply(1:ncol(y), function(i) spline(x = c(0, time[lmk_inds[,i]], 1),
-                                                y = c(0, ref_lmk_inds/nrow(y), 1), xout = time, method = "hyman")$y)
+                                                y = c(0, time[ref_lmk_inds], 1), xout = time, method = "hyman")$y)
   mcmc_list <- .template_warp_C(y, time, wtime_init, feats, ref_lmk, P, n_iter, n_burn, n_thin, a_eps, b_eps, a_a, b_a, a_c, b_c, a_tau, b_tau, a_lam, b_lam)
   names(mcmc_list) <- c("a", "c", "beta", "sig2e", "sig2a", "sig2c", "tau2", "lam2", "alpha", "eta", "wtime", "mu")
   return(mcmc_list)
