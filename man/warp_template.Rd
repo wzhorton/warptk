@@ -6,8 +6,8 @@
 \usage{
 warp_template(
   y,
-  lmk_inds,
-  ref_lmk_inds,
+  lmk_inds = NULL,
+  ref_lmk_inds = NULL,
   p = 10,
   n_iter = 15000,
   n_burn = 10000,
