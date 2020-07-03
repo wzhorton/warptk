@@ -57,7 +57,8 @@ register <- function(y, wtime){
     wtime <- as.matrix(apply(wtime,c(1,2),mean))
   }
   sapply(1:ncol(y), function(i){
-    interp_spline(y[,i], wtime[,i])
+    #interp_spline(y[,i], wtime[,i])
+    approx(y = y[,i], x = wtime[,i], n = nrow(y))$y
   })
 }
 
