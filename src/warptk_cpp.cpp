@@ -146,7 +146,8 @@ arma::vec rmnorm(arma::vec mu, arma::mat covprec, bool is_prec) {//slower but mo
     arma::vec evals;
     arma::mat evecs;
     arma::eig_sym(evals, evecs, covprec);
-    arma::mat Dhalf = diagmat(sqrt(arma::clamp(evals, 0.0, evals.max())));
+    //arma::mat Dhalf = diagmat(sqrt(arma::clamp(evals, 0.0, evals.max())));
+    arma::mat Dhalf = diagmat(sqrt(evals));
     return mu + evecs*Dhalf*z;
   }
 }
@@ -604,9 +605,9 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
   for(int i=0; i<n; i++){
     M_timefeat_gen.slice(i) = arma::exp(-50/2*D2timefeat.slice(i));
     M_feat_gen.slice(i) = arma::exp(-50/2*D2feat.slice(i));
-    M_feat_gen.slice(i).diag() += .0005;
-    M_feat_gen.slice(i)(0,0) = 1; // may not be stable
-    M_feat_gen.slice(i)(l-1,l-1) = 1;
+    /////////////M_feat_gen.slice(i).diag() += .0005;
+    /////////////M_feat_gen.slice(i)(0,0) = 1; // may not be stable
+    /////////////M_feat_gen.slice(i)(l-1,l-1) = 1;
   }
 
   arma::mat wtime = wtime_init;
