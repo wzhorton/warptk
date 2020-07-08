@@ -148,7 +148,7 @@ arma::vec rmnorm(arma::vec mu, arma::mat covprec, bool is_prec) {//slower but mo
     arma::eig_sym(evals, evecs, covprec);
     arma::mat Dhalf = diagmat(sqrt(arma::clamp(evals, 0.0, evals.max())));
     //arma::mat Dhalf = diagmat(sqrt(evals));
-    return mu + evecs*Dhalf*z;
+    return mu + evecs*Dhalf*evecs.t()*z;
   }
 }
 
@@ -605,9 +605,9 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
   for(int i=0; i<n; i++){
     M_timefeat_gen.slice(i) = arma::exp(-50/2*D2timefeat.slice(i));
     M_feat_gen.slice(i) = arma::exp(-50/2*D2feat.slice(i));
-    /////////////M_feat_gen.slice(i).diag() += .0005;
-    /////////////M_feat_gen.slice(i)(0,0) = 1; // may not be stable
-    /////////////M_feat_gen.slice(i)(l-1,l-1) = 1;
+    //M_feat_gen.slice(i).diag() += .0005;
+    M_feat_gen.slice(i)(0,0) = 1; // may not be stable
+    M_feat_gen.slice(i)(l-1,l-1) = 1;
   }
 
   arma::mat wtime = wtime_init;
@@ -728,12 +728,18 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
 
 
 
-    //Rcpp::Rcout << "Flag 1" << std::endl;
+    //Rcpp::Rcout << "Flag 1" << std::endl;o
     for(int i=0; i<n; i++){ //Could speed up by cutting out the middle loop. Remake qform function (or make another)
       curr_lpost_wtime = -.5/sig2_eps*dot(ymat.col(i)-mu.col(i), ymat.col(i)-mu.col(i)) - .5/lam2*ssq_wtime(i);
       //return List::create(M_timefeat_gen, M_feat_gen, M_time_gen);///////////skdjfhskdjfhskdjhsdf
       cand_wtime = rmnorm(wtime.col(i),// + M_timefeat_gen.slice(i)*solve(M_feat_gen.slice(i), ref_time - lmk_time.col(i)), //0 out after shift.
                           lam2_gen*(M_time_gen - M_timefeat_gen.slice(i)*solve(M_feat_gen.slice(i), M_timefeat_gen.slice(i).t())), false);
+      if(i==1){
+        //Rcpp::Rcout << (M_time_gen - M_timefeat_gen.slice(i)*solve(M_feat_gen.slice(i), M_timefeat_gen.slice(i).t()))(34,34) << std::endl;
+      }
+      //for(int j=0; j<l; j++){
+      //  cand_wtime(lmk_inds(j,i)) = ref_time(j);
+      //}
       /// THIS ISN"T CENTERED ABOUT THE PREVIOUS CURVES AND IT SHOULDN"T HAVE THE NUGGET> (but liks shouls) START FROM D2 SCRATCH
       candH = bs_even(cand_wtime,p-2); // NEED TO PROPOSE VALUES NOT USING ETA AND ALPHA IN M!!
       cand_mu = a(i) + c(i)*candH*beta;
