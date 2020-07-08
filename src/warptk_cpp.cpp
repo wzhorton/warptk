@@ -148,7 +148,7 @@ arma::vec rmnorm(arma::vec mu, arma::mat covprec, bool is_prec) {//slower but mo
     arma::eig_sym(evals, evecs, covprec);
     arma::mat Dhalf = diagmat(sqrt(arma::clamp(evals, 0.0, evals.max())));
     //arma::mat Dhalf = diagmat(sqrt(evals));
-    return name + evecs*Dhalf*z;
+    return mu + evecs*Dhalf*evecs.t()*z;
   }
 }
 
