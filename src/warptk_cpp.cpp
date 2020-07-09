@@ -599,12 +599,12 @@ List template_warp(arma::mat ymat, arma::vec time, arma::mat wtime_init, arma::m
   }
 
   double lam2_gen = .00005;
-  arma::mat M_time_gen = arma::exp(-50/2*D2time);
+  arma::mat M_time_gen = arma::exp(-5/2*D2time);
   arma::cube M_feat_gen(l,l,n);
   arma::cube M_timefeat_gen(m,l,n);
   for(int i=0; i<n; i++){
-    M_timefeat_gen.slice(i) = arma::exp(-50/2*D2timefeat.slice(i));
-    M_feat_gen.slice(i) = arma::exp(-50/2*D2feat.slice(i));
+    M_timefeat_gen.slice(i) = arma::exp(-5/2*D2timefeat.slice(i));
+    M_feat_gen.slice(i) = arma::exp(-5/2*D2feat.slice(i));
     /////////////M_feat_gen.slice(i).diag() += .0005;
     /////////////M_feat_gen.slice(i)(0,0) = 1; // may not be stable
     /////////////M_feat_gen.slice(i)(l-1,l-1) = 1;

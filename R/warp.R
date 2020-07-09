@@ -50,7 +50,7 @@ warp_bhcr <- function(y, p = 10, q = 6,  n_iter=15000, n_burn=10000, n_thin = 1,
 
 warp_template <- function(y, lmk_inds = NULL, ref_lmk_inds = NULL, p = 10,
                       n_iter=15000, n_burn=10000, n_thin = 1,
-                      a_eps=length(y), b_eps=.1, a_a =.1, b_a=.1, a_c = .1, b_c = .1,
+                      a_eps=length(y)/2, b_eps=.1, a_a =.1, b_a=.1, a_c = .1, b_c = .1,
                       a_tau=.1, b_tau=.1, a_lam = .1, b_lam = .1){
   time <- seq(0,1,len=nrow(y))
   P <- K1(p)

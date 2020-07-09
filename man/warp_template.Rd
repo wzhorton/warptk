@@ -12,7 +12,7 @@ warp_template(
   n_iter = 15000,
   n_burn = 10000,
   n_thin = 1,
-  a_eps = length(y),
+  a_eps = length(y)/2,
   b_eps = 0.1,
   a_a = 0.1,
   b_a = 0.1,
