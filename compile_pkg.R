@@ -17,3 +17,5 @@ devtools::document()
 # setting build_vignettes = FALSE will considerably speed up installation.
 # if built with vignettes, use browseVignettes("pkgname") to view.
 devtools::install(build_vignettes = FALSE)
+
+# devtools::build(binary = TRUE)
